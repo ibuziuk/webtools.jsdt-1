@@ -14,19 +14,28 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IResourceProxyVisitor;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -45,6 +54,15 @@ import org.eclipse.wst.jsdt.internal.core.JavaProject;
 import org.eclipse.wst.jsdt.internal.core.util.Messages;
 import org.eclipse.wst.jsdt.internal.core.util.Util;
 
+import com.palantir.typescript.EclipseResources;
+import com.palantir.typescript.TypeScriptPlugin;
+import com.palantir.typescript.services.language.DiagnosticEx;
+import com.palantir.typescript.services.language.FileDelta;
+import com.palantir.typescript.services.language.FileDelta.Delta;
+import com.palantir.typescript.services.language.LanguageEndpoint;
+import com.palantir.typescript.services.language.OutputFile;
+import com.palantir.typescript.services.language.TodoCommentEx;
+
 public class JavaBuilder extends IncrementalProjectBuilder {
 
 IProject currentProject;
@@ -61,12 +79,18 @@ public static final String SOURCE_ID = "JSDT"; //$NON-NLS-1$
 
 public static boolean DEBUG = false;
 
+private final LanguageEndpoint languageEndpoint;
+
 /**
  * A list of project names that have been built.
  * This list is used to reset the JavaModel.existingExternalFiles cache when a build cycle begins
  * so that deleted external jars are discovered.
  */
 static ArrayList builtProjects = null;
+
+public JavaBuilder (){
+	 this.languageEndpoint = TypeScriptPlugin.getDefault().getBuilderLanguageEndpoint();
+}
 
 public static IMarker[] getProblemsFor(IResource resource) {
 	try {
@@ -173,9 +197,10 @@ public static void writeState(Object state, DataOutputStream out) throws IOExcep
 	((State) state).write(out);
 }
 
-protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) throws CoreException {
+protected IProject[] build(int kind, Map<String, String> ignored, IProgressMonitor monitor) throws CoreException {
 	this.currentProject = getProject();
 	if (currentProject == null || !currentProject.isAccessible()) return new IProject[0];
+	initializeBuilder(kind, false);
 
 	if (DEBUG)
 		System.out.println("\nStarting build of " + currentProject.getName() //$NON-NLS-1$
@@ -185,7 +210,6 @@ protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) thro
 	boolean ok = false;
 	try {
 		notifier.checkCancel();
-		kind = initializeBuilder(kind, true);
 
 		if (isWorthBuilding()) {
 			if (kind == FULL_BUILD) {
@@ -281,32 +305,276 @@ protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) thro
 	return requiredProjects;
 }
 
-private void buildAll() {
+private void buildAll() throws CoreException{
 	notifier.checkCancel();
 	notifier.subTask(Messages.bind(Messages.build_preparingBuild, this.currentProject.getName()));
-	if (DEBUG && lastState != null)
-		System.out.println("Clearing last state : " + lastState); //$NON-NLS-1$
-	clearLastState();
-	BatchImageBuilder imageBuilder = new BatchImageBuilder(this, true);
-	imageBuilder.build();
-	recordNewState(imageBuilder.newState);
+	Set<FileDelta> fileDeltas = this.getAllSourceFiles(Delta.ADDED);
+	this.languageEndpoint.initializeProject(this.getProject());
+    this.build(fileDeltas, notifier.monitor);
+    
 }
 
-private void buildDeltas(SimpleLookupTable deltas) {
-	notifier.checkCancel();
-	notifier.subTask(Messages.bind(Messages.build_preparingBuild, this.currentProject.getName()));
-	if (DEBUG && lastState != null)
-		System.out.println("Clearing last state : " + lastState); //$NON-NLS-1$
-	clearLastState(); // clear the previously built state so if the build fails, a full build will occur next time
-	IncrementalImageBuilder imageBuilder = new IncrementalImageBuilder(this);
-	if (imageBuilder.build(deltas)) {
-		recordNewState(imageBuilder.newState);
-	} else {
-		if (DEBUG)
-			System.out.println("Performing full build since incremental build failed"); //$NON-NLS-1$
-		buildAll();
+private Set<FileDelta> getAllSourceFiles(final Delta withDelta) throws CoreException{
+	final Set<FileDelta> fileDeltas = new HashSet<FileDelta>();
+
+    IProject project = this.getProject();
+    ClasspathMultiDirectory[] sourceLocations = nameEnvironment.sourceLocations;
+    for (int i = 0, l = sourceLocations.length; i < l; i++) {
+		final ClasspathMultiDirectory sourceLocation = sourceLocations[i];
+		final char[][] exclusionPatterns = sourceLocation.exclusionPatterns;
+		final char[][] inclusionPatterns = sourceLocation.inclusionPatterns;
+		final boolean isAlsoProject = sourceLocation.sourceFolder.equals(project);
+		final int segmentCount = sourceLocation.sourceFolder.getFullPath().segmentCount();
+		final IContainer outputFolder = sourceLocation.binaryFolder;
+		final boolean isOutputFolder = sourceLocation.sourceFolder.equals(outputFolder);
+		sourceLocation.sourceFolder.accept(
+			new IResourceProxyVisitor() {
+				public boolean visit(IResourceProxy proxy) throws CoreException {
+					if (proxy.isDerived())
+						return false;
+					switch(proxy.getType()) {
+						case IResource.FILE :
+							if (org.eclipse.wst.jsdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
+								IResource resource = proxy.requestResource();
+								if (exclusionPatterns != null || inclusionPatterns != null)
+									if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
+										return false;
+								fileDeltas.add(new FileDelta(withDelta, resource.getAdapter(IFile.class)));
+							}
+							return false;
+						case IResource.FOLDER :
+							IPath folderPath = null;
+							if (isAlsoProject)
+								if (isExcludedFromProject(folderPath = proxy.requestFullPath()))
+									return false;
+							if (JavaScriptCore.isReadOnly(proxy.requestResource()))
+								return false;
+							if (exclusionPatterns != null) {
+								if (folderPath == null)
+									folderPath = proxy.requestFullPath();
+								if (Util.isExcluded(folderPath, inclusionPatterns, exclusionPatterns, true)) {
+									// must walk children if inclusionPatterns != null, can skip them if == null
+									// but folder is excluded so do not create it in the output folder
+									return inclusionPatterns != null;
+								}
+							}
+					}
+					return true;
+				}
+			},
+			IResource.NONE
+		);
+		notifier.checkCancel();
 	}
+    return Collections.unmodifiableSet(fileDeltas); 
 }
+
+protected boolean isExcludedFromProject(IPath childPath) throws JavaScriptModelException {
+	// answer whether the folder should be ignored when walking the project as a source folder
+	if (childPath.segmentCount() > 2) return false; // is a subfolder of a package
+	 ClasspathMultiDirectory[] sourceLocations = nameEnvironment.sourceLocations;
+	for (int j = 0, k = sourceLocations.length; j < k; j++) {
+		if (childPath.equals(sourceLocations[j].binaryFolder.getFullPath())) return true;
+		if (childPath.equals(sourceLocations[j].sourceFolder.getFullPath())) return true;
+	}
+	// skip default output folder which may not be used by any source folder
+	return childPath.equals(javaProject.getOutputLocation());
+}
+
+private void buildDeltas(SimpleLookupTable deltas) throws CoreException{
+	notifier.checkCancel();
+	IProject project = this.getProject();
+	notifier.subTask(Messages.bind(Messages.build_preparingBuild, project.getName()));
+	IResourceDelta delta = this.getDelta(project);
+	Set<FileDelta> allFileDeltas = getFileDeltas(delta);
+	if(!allFileDeltas.isEmpty()){
+		this.build(allFileDeltas, notifier.monitor);
+	}
+	createMarkers(currentProject, notifier.monitor);
+	
+	
+}
+
+private Set<FileDelta> getFileDeltas(final IResourceDelta delta) throws CoreException{
+		final Set<FileDelta> fileDeltas = new HashSet<FileDelta>();
+	    IProject project = this.getProject();
+	    ClasspathMultiDirectory[] sourceLocations = nameEnvironment.sourceLocations;
+	    for (int i = 0, l = sourceLocations.length; i < l; i++) {
+			final ClasspathMultiDirectory sourceLocation = sourceLocations[i];
+			final char[][] exclusionPatterns = sourceLocation.exclusionPatterns;
+			final char[][] inclusionPatterns = sourceLocation.inclusionPatterns;
+			final boolean isAlsoProject = sourceLocation.sourceFolder.equals(project);
+			final int segmentCount = sourceLocation.sourceFolder.getFullPath().segmentCount();
+			final IContainer outputFolder = sourceLocation.binaryFolder;
+			final boolean isOutputFolder = sourceLocation.sourceFolder.equals(outputFolder);
+			sourceLocation.sourceFolder.accept(
+				new IResourceProxyVisitor() {
+					public boolean visit(IResourceProxy proxy) throws CoreException {
+						if (proxy.isDerived())
+							return false;
+						switch(proxy.getType()) {
+							case IResource.FILE :
+								if (org.eclipse.wst.jsdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
+									IResource resource = proxy.requestResource();
+									if (exclusionPatterns != null || inclusionPatterns != null)
+										if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
+											return false;
+									if((delta.getFlags() & IResourceDelta.CONTENT | IResourceDelta.ENCODING) != 0 ){
+										fileDeltas.add(new FileDelta(getDeltaEnum(delta), resource.getAdapter(IFile.class)));
+									}
+								}
+								return false;
+							case IResource.FOLDER :
+								IPath folderPath = null;
+								if (isAlsoProject)
+									if (isExcludedFromProject(folderPath = proxy.requestFullPath()))
+										return false;
+								if (JavaScriptCore.isReadOnly(proxy.requestResource()))
+									return false;
+								if (exclusionPatterns != null) {
+									if (folderPath == null)
+										folderPath = proxy.requestFullPath();
+									if (Util.isExcluded(folderPath, inclusionPatterns, exclusionPatterns, true)) {
+										// must walk children if inclusionPatterns != null, can skip them if == null
+										// but folder is excluded so do not create it in the output folder
+										return inclusionPatterns != null;
+									}
+								}
+						}
+						return true;
+					}
+				},
+				IResource.NONE
+			);
+			notifier.checkCancel();
+		}
+	    return Collections.unmodifiableSet(fileDeltas); 
+}
+
+private Delta getDeltaEnum(IResourceDelta delta) {
+    switch (delta.getKind()) {
+        case IResourceDelta.ADDED:
+            return Delta.ADDED;
+        case IResourceDelta.CHANGED:
+            return Delta.CHANGED;
+        case IResourceDelta.REMOVED:
+            return Delta.REMOVED;
+        default:
+            throw new IllegalStateException();
+    }
+}
+
+
+private void build(Set<FileDelta> fileDeltas, IProgressMonitor monitor) throws CoreException {
+
+	this.clean(monitor);
+	
+//	this.clean(fileDeltas);
+	this.compile(fileDeltas, monitor);
+	this.createMarkers(this.getProject(), monitor);
+
+
+}
+
+private void compile(Set<FileDelta> fileDeltas, IProgressMonitor monitor) throws CoreException {
+    for (FileDelta fileDelta : fileDeltas) {
+        Delta delta = fileDelta.getDelta();
+
+        if (delta == Delta.ADDED || delta == Delta.CHANGED) {
+            String fileName = fileDelta.getFileName();
+
+            // skip definition files
+            if (isDefinitionFile(fileName)) {
+                continue;
+            }
+
+            // compile the file
+            try {
+                this.compile(fileName, monitor);
+            } catch (RuntimeException e) {
+                String errorMessage = "Compilation of '" + fileName + "' failed.";
+                System.out.println(errorMessage);
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+private void compile(String fileName, IProgressMonitor monitor) throws CoreException {
+    IProject project = this.getProject();
+    for (OutputFile outputFile : this.languageEndpoint.getEmitOutput(project, fileName)) {
+    }
+
+}
+
+
+private static boolean isDefinitionFile(String fileName) {
+    return fileName.endsWith(".d.ts");
+}
+
+private void createMarkers(IProject project, IProgressMonitor monitor) throws CoreException {
+    final Map<String, List<DiagnosticEx>> diagnostics = this.languageEndpoint.getAllDiagnostics(project);
+    final Map<String, List<TodoCommentEx>> todos = this.languageEndpoint.getAllTodoComments(project);
+
+    // create the markers within a workspace runnable for greater efficiency
+    IWorkspaceRunnable runnable = new IWorkspaceRunnable() {
+		
+		public void run(IProgressMonitor runnablemonitor) throws CoreException {
+			createMarkers(diagnostics, todos);
+		}
+	};
+
+    ResourcesPlugin.getWorkspace().run(runnable, project, IWorkspace.AVOID_UPDATE, monitor);
+}
+
+
+/**
+ * @param diagnostics
+ * @param todos
+ */
+protected void createMarkers(Map<String, List<DiagnosticEx>> diagnostics, Map<String, List<TodoCommentEx>> todos) throws CoreException{
+    for (Map.Entry<String, List<DiagnosticEx>> entry : diagnostics.entrySet()) {
+        String fileName = entry.getKey();
+
+        // create the problem markers for this file
+        IFile file = EclipseResources.getFile(fileName);
+        List<DiagnosticEx> fileDiagnostics = entry.getValue();
+        for (DiagnosticEx diagnostic : fileDiagnostics) {
+    		IMarker marker = currentProject.createMarker(IJavaScriptModelMarker.JAVASCRIPT_MODEL_PROBLEM_MARKER);
+    		marker.setAttributes(
+    			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IJavaScriptModelMarker.CATEGORY_ID, IMarker.SOURCE_ID,
+    						IMarker.CHAR_START, IMarker.CHAR_END, IMarker.LINE_NUMBER},
+    			new Object[] {
+    						diagnostic.getText(),
+    				Integer.valueOf(IMarker.SEVERITY_ERROR),
+    				Integer.valueOf(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM),
+    				JavaBuilder.SOURCE_ID,
+    				diagnostic.getStart(),
+    				diagnostic.getStart() + diagnostic.getLength(),
+    				diagnostic.getLine()
+    			});
+
+
+        }
+    }
+
+//    for (Map.Entry<String, List<TodoCommentEx>> entry : todoComments.entrySet()) {
+//        String fileName = entry.getKey();
+//
+//        // create the task markers for this file
+//        IFile file = EclipseResources.getFile(fileName);
+//        List<TodoCommentEx> fileTodos = entry.getValue();
+//        for (TodoCommentEx todo : fileTodos) {
+//            IMarker marker = file.createMarker(TASK_MARKER_TYPE);
+//            Map<String, Object> attributes = createTaskMarkerAttributes(todo);
+//
+//            marker.setAttributes(attributes);
+//        }
+//    }	
+}
+
+
+
 
 protected void clean(IProgressMonitor monitor) throws CoreException {
 	this.currentProject = getProject();
@@ -339,7 +607,7 @@ protected void clean(IProgressMonitor monitor) throws CoreException {
 		);
 	} finally {
 		notifier.done();
-		cleanup();
+//		cleanup();
 	}
 	if (DEBUG)
 		System.out.println("Finished cleaning " + currentProject.getName() //$NON-NLS-1$
