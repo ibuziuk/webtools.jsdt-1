@@ -6003,6 +6003,7 @@ public CompilationUnitDeclaration parse(
 	int start,
 	int end) {
 	// parses a compilation unit and manages error handling (even bugs....)
+	
 
 	CompilationUnitDeclaration unit;
 	try {
@@ -6028,21 +6029,27 @@ public CompilationUnitDeclaration parse(
 			this.problemReporter().cannotReadSource(this.compilationUnit, abortException, this.options.verbose);
 			contents = CharOperation.NO_CHAR; // pretend empty from thereon
 		}
-		this.scanner.setSource(contents);
-		this.compilationUnit.sourceEnd = this.scanner.source.length - 1;
-		if (end != -1) this.scanner.resetTo(start, end);
-		if (this.javadocParser != null && this.javadocParser.checkDocComment) {
-			this.javadocParser.scanner.setSource(contents);
-			if (end != -1) {
-				this.javadocParser.scanner.resetTo(start, end);
-			}
-		}
-		/* run automaton */
-		if (false)
-			System.out.println("parsing "+new String(sourceUnit.getFileName())); //$NON-NLS-1$
-		if (options.complianceLevel > ClassFileConstants.JDK0_0) {
-			parse();
-		}
+		AcornParser acorn = new AcornParser();
+		acorn.parse(String.valueOf(contents));
+//		this.scanner.setSource(contents);
+//		this.compilationUnit.sourceEnd = this.scanner.source.length - 1;
+//		if (end != -1) this.scanner.resetTo(start, end);
+//		if (this.javadocParser != null && this.javadocParser.checkDocComment) {
+//			this.javadocParser.scanner.setSource(contents);
+//			if (end != -1) {
+//				this.javadocParser.scanner.resetTo(start, end);
+//			}
+//		}
+//		/* run automaton */
+//		if (false)
+//			System.out.println("parsing "+new String(sourceUnit.getFileName())); //$NON-NLS-1$
+//		if (options.complianceLevel > ClassFileConstants.JDK0_0) {
+//			parse();
+//		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	} finally {
 		unit = this.compilationUnit;
 		this.compilationUnit = null; // reset parser
@@ -7139,7 +7146,7 @@ public void inferTypes(CompilationUnitDeclaration parsedUnit, CompilerOptions co
 			else
 				engine.setCompilationUnit(parsedUnit);
 
-			engine.doInfer();
+			//engine.doInfer();
 		} catch (RuntimeException e) {
 			org.eclipse.wst.jsdt.internal.core.util.Util.log(e, "error during type inferencing"); //$NON-NLS-1$
 		}

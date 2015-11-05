@@ -554,7 +554,7 @@ public final class ASTProvider {
 			return null;
 		
 		final ASTParser parser = ASTParser.newParser(SHARED_AST_LEVEL);
-		parser.setResolveBindings(true);
+		parser.setResolveBindings(false);
 		parser.setStatementsRecovery(SHARED_AST_STATEMENT_RECOVERY);
 		parser.setBindingsRecovery(SHARED_BINDING_RECOVERY);
 

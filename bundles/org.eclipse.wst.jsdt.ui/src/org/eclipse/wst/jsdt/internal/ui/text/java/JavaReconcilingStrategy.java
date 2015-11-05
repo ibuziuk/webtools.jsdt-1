@@ -89,8 +89,8 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 								// reconcile
 								if (fIsJavaReconcilingListener && isASTNeeded) {
 									int reconcileFlags= IJavaScriptUnit.FORCE_PROBLEM_DETECTION 
-										| (ASTProvider.SHARED_AST_STATEMENT_RECOVERY ? IJavaScriptUnit.ENABLE_STATEMENTS_RECOVERY : 0)
-										| (ASTProvider.SHARED_BINDING_RECOVERY ? IJavaScriptUnit.ENABLE_BINDINGS_RECOVERY : 0);
+										| (ASTProvider.SHARED_AST_STATEMENT_RECOVERY ? IJavaScriptUnit.ENABLE_STATEMENTS_RECOVERY : 0);
+										//| (ASTProvider.SHARED_BINDING_RECOVERY ? IJavaScriptUnit.ENABLE_BINDINGS_RECOVERY : 0);
 											
 									ast[0]= unit.reconcile(ASTProvider.SHARED_AST_LEVEL, reconcileFlags, null, fProgressMonitor);
 									if (ast[0] != null) {

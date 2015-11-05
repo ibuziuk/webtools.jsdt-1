@@ -844,7 +844,7 @@ public class ASTParser {
 							throw new IllegalStateException();
 						}
 					} else if (this.rawSource != null) {
-						needToResolveBindings = this.resolveBindings && this.unitName != null && this.project != null && this.compilerOptions != null;
+						needToResolveBindings = false;//this.resolveBindings && this.unitName != null && this.project != null && this.compilerOptions != null;
 						sourceUnit = new BasicCompilationUnit(this.rawSource, null, this.unitName == null ? "" : this.unitName, this.project); //$NON-NLS-1$
 					} else {
 						throw new IllegalStateException();
