@@ -3142,12 +3142,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 							&& (data[++index] == 'n')
 							&& (data[++index] == 's')
 							&& (data[++index] == 't'))
-							if (this.sourceLevel >= ClassFileConstants.JDK1_4) {
 								return TokenNameconst;
-							} else {
-								this.useAssertAsAnIndentifier = true;
-								return TokenNameIdentifier;
-							}
 						else
 							return TokenNameIdentifier;
 				case 8 :
@@ -3444,7 +3439,15 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 					return TokenNameIdentifier;
 			}
 
-		case 'l' : //long
+		case 'l' :
+			//let
+			if(length == 3){
+				if(data[++index] == 'e' &&
+					data[++index] == 't'){
+					return TokenNamelet;
+				}
+			}
+			//long
 			if (length == 4) {
 				if ((data[++index] == 'o')
 					&& (data[++index] == 'n')

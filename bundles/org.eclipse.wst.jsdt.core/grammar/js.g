@@ -43,7 +43,7 @@ $Terminals
 
 	Identifier
 
-	abstract boolean break byte case catch char class 
+	abstract await boolean break byte case catch char class 
 	continue const default debugger delete do double else enum export extends false final finally float
 	for function  goto if in implements import instanceof int
 	interface let long native new null package private
@@ -107,6 +107,7 @@ $Terminals
 	COMMA
 	DOT
 	EQUAL
+	ARROW
 
 --    BodyMarker
 
@@ -160,6 +161,7 @@ $Alias
 	','    ::= COMMA
 	'.'    ::= DOT
 	'='    ::= EQUAL
+	'=>'   ::= ARROW
 	
 $Start
 	Goal
@@ -381,12 +383,31 @@ LocalVariableDeclarationStatement ::= LocalVariableDeclaration ';'
 /:$readableName LocalVariableDeclarationStatement:/
 
 LocalVariableDeclaration ::= 'var' PushModifiers VariableDeclarators
-/.$putCase consumeLocalVariableDeclaration(); $break ./
+/.$putCase consumeLocalVariableDeclaration("var"); $break ./
 /:$readableName LocalVariableDeclaration:/
 
 LocalVariableDeclarationNoIn ::= 'var' PushModifiers VariableDeclaratorsNoIn
-/.$putCase consumeLocalVariableDeclaration(); $break ./
+/.$putCase consumeLocalVariableDeclaration("var"); $break ./
 /:$readableName LocalVariableDeclaration:/
+
+------ ES6 let & const --------
+
+LocalVariableDeclaration ::= 'let' PushModifiers VariableDeclarators
+/.$putCase consumeLocalVariableDeclaration("let"); $break ./
+/:$readableName LocalVariableDeclaration:/
+
+LocalVariableDeclarationNoIn ::= 'let' PushModifiers VariableDeclaratorsNoIn
+/.$putCase consumeLocalVariableDeclaration("let"); $break ./
+/:$readableName LocalVariableDeclaration:/
+
+LocalVariableDeclaration ::= 'const' PushModifiers VariableDeclarators
+/.$putCase consumeLocalVariableDeclaration("const"); $break ./
+/:$readableName BlockVariableDeclaration:/
+
+LocalVariableDeclarationNoIn ::= 'const' PushModifiers VariableDeclaratorsNoIn
+/.$putCase consumeLocalVariableDeclaration("const"); $break ./
+/:$readableName LocalVariableDeclaration:/
+---------------------
 
 PushModifiers ::= $empty
 /.$putCase consumePushModifiers(); $break ./

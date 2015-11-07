@@ -32,6 +32,11 @@ import org.eclipse.wst.jsdt.internal.compiler.lookup.VariableBinding;
 public class LocalDeclaration extends AbstractVariableDeclaration implements ILocalDeclaration {
 
 	public LocalVariableBinding binding;
+	/**
+	 * The declaration keyword either var, const, or let. 
+	 * Defaults to var.
+	 */
+	public String declarationType = "var";
 	
 	private boolean isLocal = true;
 
@@ -43,6 +48,20 @@ public class LocalDeclaration extends AbstractVariableDeclaration implements ILo
 		this.declarationEnd = sourceEnd;
 	}
 
+	public StringBuffer printAsExpression(int indent, StringBuffer output) {
+		printIndent(indent, output);
+		printModifiers(this.modifiers, output);
+		output.append(declarationType);
+
+		printFragment(indent, output);
+		if (this.nextLocal!=null)
+		{
+			output.append(", "); //$NON-NLS-1$
+			this.nextLocal.printFragment(indent, output);
+		}
+		return output;
+	}
+	
 	public IAssignment getAssignment() {
 		if (this.initialization == null)
 			return null;

@@ -231,8 +231,8 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 	// this is always a LocalDeclaration
 	this.patternLocator.match((LocalDeclaration) this.astStack[this.astPtr], this.nodeSet);
 }
-protected void consumeLocalVariableDeclaration() {
-	super.consumeLocalVariableDeclaration();
+protected void consumeLocalVariableDeclaration(String declarationType) {
+	super.consumeLocalVariableDeclaration(declarationType);
 
 	// this is always a LocalDeclaration
 	this.patternLocator.match((LocalDeclaration) this.astStack[this.astPtr], this.nodeSet);
