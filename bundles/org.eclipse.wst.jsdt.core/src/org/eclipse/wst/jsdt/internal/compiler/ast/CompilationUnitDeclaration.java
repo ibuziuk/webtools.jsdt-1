@@ -46,10 +46,14 @@ import org.eclipse.wst.jsdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.wst.jsdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.wst.jsdt.internal.compiler.util.HashtableOfObject;
 
+import com.shapesecurity.shift.ast.Script;
+
 public class CompilationUnitDeclaration
 	extends ASTNode
 	implements ProblemSeverities, ReferenceContext, IScriptFileDeclaration, IInferenceFile {
 
+	private Script internalScript;
+	
 	private static final Comparator STRING_LITERAL_COMPARATOR = new Comparator() {
 		public int compare(Object o1, Object o2) {
 			StringLiteral literal1 = (StringLiteral) o1;
@@ -728,5 +732,9 @@ public class CompilationUnitDeclaration
 		if (isDefinition && type != null)
 			type.setIsDefinition(isDefinition);
 		return type;
+	}
+
+	public void setInternalScript(Script internalScript) {
+		this.internalScript = internalScript;
 	}
 }

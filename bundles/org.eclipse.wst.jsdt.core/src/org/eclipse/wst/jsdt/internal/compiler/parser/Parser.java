@@ -132,11 +132,14 @@ import org.eclipse.wst.jsdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.wst.jsdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.wst.jsdt.internal.compiler.parser.diagnose.DiagnoseParser;
 import org.eclipse.wst.jsdt.internal.compiler.problem.AbortCompilation;
-import org.eclipse.wst.jsdt.internal.compiler.problem.AbortCompilationUnit;
 import org.eclipse.wst.jsdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.wst.jsdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.wst.jsdt.internal.compiler.util.Messages;
 import org.eclipse.wst.jsdt.internal.compiler.util.Util;
+
+import com.shapesecurity.shift.ast.Script;
+import com.shapesecurity.shift.parser.JsError;
+import com.shapesecurity.shift.visitor.Director;
 
 public class Parser implements  ParserBasicInformation, TerminalTokens, OperatorIds, TypeIds {
 
@@ -5870,6 +5873,7 @@ protected void parse() {
 public void parse(ConstructorDeclaration cd, CompilationUnitDeclaration unit) {
 	parse(cd, unit, false);
 }
+
 public void parse(ConstructorDeclaration cd, CompilationUnitDeclaration unit, boolean recordLineSeparator) {
 	//only parse the method body of cd
 	//fill out its statements
@@ -5985,7 +5989,7 @@ public void parse(
 	if ((type.bits & ASTNode.HasLocalType) != 0) {
 		field.bits |= ASTNode.HasLocalType;
 	}
-}
+} 	
 // A P I
 
 public CompilationUnitDeclaration parse(
@@ -6003,52 +6007,28 @@ public CompilationUnitDeclaration parse(
 	int start,
 	int end) {
 	// parses a compilation unit and manages error handling (even bugs....)
-
-	CompilationUnitDeclaration unit;
+	long starttime = System.currentTimeMillis();
+	CompilationUnitDeclaration unit = new CompilationUnitDeclaration(
+				this.problemReporter,
+				compilationResult,
+				0);
+	this.compilationUnit = unit;
+	
 	try {
-		/* automaton initialization */
-		initialize(true);
-		goForCompilationUnit();
-
-		/* unit creation */
-		this.referenceContext =
-			this.compilationUnit =
-				new CompilationUnitDeclaration(
-					this.problemReporter,
-					compilationResult,
-					0);
-
-		initializeInferenceEngine(this.compilationUnit);
-
-		/* scanners initialization */
-		char[] contents;
-		try {
-			contents = sourceUnit.getContents();
-		} catch(AbortCompilationUnit abortException) {
-			this.problemReporter().cannotReadSource(this.compilationUnit, abortException, this.options.verbose);
-			contents = CharOperation.NO_CHAR; // pretend empty from thereon
-		}
-		this.scanner.setSource(contents);
-		this.compilationUnit.sourceEnd = this.scanner.source.length - 1;
-		if (end != -1) this.scanner.resetTo(start, end);
-		if (this.javadocParser != null && this.javadocParser.checkDocComment) {
-			this.javadocParser.scanner.setSource(contents);
-			if (end != -1) {
-				this.javadocParser.scanner.resetTo(start, end);
-			}
-		}
-		/* run automaton */
-		if (false)
-			System.out.println("parsing "+new String(sourceUnit.getFileName())); //$NON-NLS-1$
-		if (options.complianceLevel > ClassFileConstants.JDK0_0) {
-			parse();
-		}
-	} finally {
-		unit = this.compilationUnit;
-		this.compilationUnit = null; // reset parser
-		// tag unit has having read bodies
-		if (!this.diet) unit.bits |= ASTNode.HasAllMethodBodies;
+		Script script = com.shapesecurity.shift.parser.Parser.parseScript(String.valueOf(sourceUnit.getContents()));
+		Director.reduceScript(new CUDeclarationReducer(unit), script);
 	}
+	catch (Throwable e) {
+		if( e instanceof JsError){
+			JsError error = (JsError)e;
+			problemReporter.handle(0,
+						null, null, ProblemSeverities.AbortCompilation, error.getIndex(), error.getIndex() +1 , unit, compilationResult);
+		}
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+	System.out.println("Parsed "+ String.valueOf(compilationResult.getFileName()) +" in " + (System.currentTimeMillis() - starttime) + " ms");
 	return unit;
 }
 

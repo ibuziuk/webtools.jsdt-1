@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Bundle;
 
-import com.ibm.icu.util.StringTokenizer;
+//import com.ibm.icu.util.StringTokenizer;
 
 /**
  * Small convenience class to log messages to plugin's log file and also, if
@@ -115,7 +115,7 @@ public class Logger {
 
 		String traceFilter = Platform.getDebugOption(PLUGIN_ID + TRACEFILTER_LOCATION);
 		if (traceFilter != null) {
-			StringTokenizer tokenizer = new StringTokenizer(traceFilter, ","); //$NON-NLS-1$
+			java.util.StringTokenizer tokenizer = new java.util.StringTokenizer(traceFilter, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
 				String cat = tokenizer.nextToken().trim();
 				if (category.equals(cat)) {
