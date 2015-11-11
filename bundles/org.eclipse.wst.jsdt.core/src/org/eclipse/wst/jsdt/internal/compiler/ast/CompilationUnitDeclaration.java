@@ -52,47 +52,45 @@ public class CompilationUnitDeclaration
 	extends ASTNode
 	implements ProblemSeverities, ReferenceContext, IScriptFileDeclaration, IInferenceFile {
 
-	private Script internalScript;
-	
-	private static final Comparator STRING_LITERAL_COMPARATOR = new Comparator() {
-		public int compare(Object o1, Object o2) {
-			StringLiteral literal1 = (StringLiteral) o1;
-			StringLiteral literal2 = (StringLiteral) o2;
-			return literal1.sourceStart - literal2.sourceStart;
-		}
-	};
-	private static final int STRING_LITERALS_INCREMENT = 10;
-
 	public ImportReference currentPackage;
 	public ImportReference[] imports;
 	public TypeDeclaration[] types;
-	public ProgramElement[] statements;
+	private ProgramElement[] statements;
 	public int[][] comments;
-
-
+	
+	
 	public InferredType [] inferredTypes = new InferredType[10];
 	public int numberInferredTypes=0;
 	public HashtableOfObject inferredTypesHash=new HashtableOfObject();
 	public boolean typesHaveBeenInferred=false;
-
+	
 	public boolean ignoreFurtherInvestigation = false;	// once pointless to investigate due to errors
 	public boolean ignoreMethodBodies = false;
 	public CompilationUnitScope scope;
 	public ProblemReporter problemReporter;
 	public CompilationResult compilationResult;
-
-
+	
+	
 	public LocalTypeBinding[] localTypes;
 	public int localTypeCount = 0;
-
+	
 	public CompilationUnitBinding compilationUnitBinding;
-
-
+	
+	
 	public boolean isPropagatingInnerClassEmulation;
-
+	
 	public Javadoc javadoc; // 1.5 addition for package-info.js
-
+	
 	public NLSTag[] nlsTags;
+
+	private Script internalScript;
+	
+	private static final Comparator<StringLiteral> STRING_LITERAL_COMPARATOR = new Comparator<StringLiteral>() {
+		public int compare(StringLiteral literal1, StringLiteral literal2) {
+			return literal1.sourceStart - literal2.sourceStart;
+		}
+	};
+	private static final int STRING_LITERALS_INCREMENT = 10;
 	private StringLiteral[] stringLiterals;
 	private int stringLiteralsPtr;
 
@@ -143,7 +141,7 @@ public class CompilationUnitDeclaration
 
 			this.scope.temporaryAnalysisIndex=0;
 			int maxVars=this.scope.localIndex;
-			for (Iterator iter = this.scope.externalCompilationUnits.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter = this.scope.externalCompilationUnits.iterator(); iter.hasNext();) {
 				CompilationUnitScope externalScope = (CompilationUnitScope) iter.next();
 				externalScope.temporaryAnalysisIndex=maxVars;
 				maxVars+=externalScope.localIndex;
@@ -152,7 +150,7 @@ public class CompilationUnitDeclaration
 			FlowContext flowContext = new FlowContext(null, this);
 
 			if (statements != null) {
-				List functions = null;
+				List<AbstractMethodDeclaration> functions = null;
 				for (int i = 0, length = this.statements.length; i < length; i++) {
 					// if this is not a function then analyse it
 					if(!(this.statements[i] instanceof AbstractMethodDeclaration)) {
@@ -160,8 +158,8 @@ public class CompilationUnitDeclaration
 					} else {
 						// if this is a function then store it until all non functions are finished
 						if(functions == null)
-							functions = new ArrayList();
-						functions.add(statements[i]);
+							functions = new ArrayList<AbstractMethodDeclaration>();
+						functions.add((AbstractMethodDeclaration) statements[i]);
 					}
 				}
 				if(functions != null) {
@@ -169,15 +167,6 @@ public class CompilationUnitDeclaration
 						((Statement)functions.get(f)).analyseCode(this.scope, null, flowInfo.copy());
 					}
 				}
-				
-//				for (int i = 0, count = statements.length; i < count; i++) {
-//					if (statements[i] instanceof  AbstractMethodDeclaration)
-//					{
-//						((AbstractMethodDeclaration)statements[i]).analyseCode(this.scope, null, flowInfo.copy());
-//					}
-//					else
-//					flowInfo=((Statement)statements[i]).analyseCode(scope,flowContext,flowInfo);
-//				}
 			}
 		} catch (AbortCompilationUnit e) {
 			this.ignoreFurtherInvestigation = true;
@@ -280,11 +269,11 @@ public class CompilationUnitDeclaration
 	 */
 	private static AbstractMethodDeclaration declarationOf(MethodBinding methodBinding, ProgramElement[] originalStatements) {
 		if (methodBinding != null && originalStatements != null) {
-			List statements = new ArrayList(originalStatements.length);
+			List<ProgramElement> statements = new ArrayList<ProgramElement>(originalStatements.length);
 			statements.addAll(Arrays.asList(originalStatements));
 			
 			for (int i = 0; i < statements.size(); i++) {
-				IProgramElement statement = (IProgramElement)statements.get(i);
+				IProgramElement statement = statements.get(i);
 				if (statement instanceof MessageSend) {
 					MessageSend msgSend = (MessageSend) statement;
 					
@@ -648,7 +637,7 @@ public class CompilationUnitDeclaration
 					visitor.visit(inferredType.attributes[attributeInx], scope);
 				}
 			if (inferredType.methods!=null)
-				for (Iterator iterator = inferredType.methods.iterator();  continueVisiting && iterator
+				for (Iterator<?> iterator = inferredType.methods.iterator();  continueVisiting && iterator
 						.hasNext();) {
 					InferredMethod inferredMethod = (InferredMethod) iterator.next();
 					visitor.visit(inferredMethod, scope);
@@ -734,7 +723,7 @@ public class CompilationUnitDeclaration
 		return type;
 	}
 
-	public void setInternalScript(Script internalScript) {
-		this.internalScript = internalScript;
+	public void setInternalScript(Script aScript) {
+		this.internalScript = aScript;
 	}
 }
