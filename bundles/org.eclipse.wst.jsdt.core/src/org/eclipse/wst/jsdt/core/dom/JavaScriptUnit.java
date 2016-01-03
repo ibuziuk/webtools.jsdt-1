@@ -644,7 +644,7 @@ public class JavaScriptUnit extends ASTNode {
 	 * @return the live list of import declaration nodes
 	 *    (elementType: <code>ImportDeclaration</code>)
 	 */
-	public List imports() {
+	public List<ASTNode> imports() {
 		return this.imports;
 	}
 
@@ -1045,7 +1045,7 @@ public class JavaScriptUnit extends ASTNode {
 		return this.types;
 	}
 
-	public List statements() {
+	public List<ASTNode> statements() {
 		return this.statements;
 	}
 

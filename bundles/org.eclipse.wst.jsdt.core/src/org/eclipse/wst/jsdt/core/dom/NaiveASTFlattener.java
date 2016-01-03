@@ -445,6 +445,12 @@ class NaiveASTFlattener extends ASTVisitor {
 		this.buffer.append(";\n");//$NON-NLS-1$
 		return false;
 	}
+	
+	public boolean visit(DebuggerStatement node){
+		printIndent();
+		this.buffer.append("debugger;\n");//$NON-NLS-1$
+		return false;		
+	}
 
 	/*
 	 * @see ASTVisitor#visit(EnhancedForStatement)
@@ -1356,7 +1362,18 @@ class NaiveASTFlattener extends ASTVisitor {
 //		Type type = node.getType();
 //		if (type!=null)
 //			type.accept(this);
-		this.buffer.append("var ");//$NON-NLS-1$
+		switch (node.getKind()) {
+			case LET :
+				this.buffer.append("let ");//$NON-NLS-1$		
+				break;
+			case CONST: 
+				this.buffer.append("const ");//$NON-NLS-1$
+				break;				
+			case VAR://intentional
+			default :
+				this.buffer.append("var ");//$NON-NLS-1$
+				break;
+		}
 		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {
 			VariableDeclarationFragment f = (VariableDeclarationFragment) it.next();
 			f.accept(this);

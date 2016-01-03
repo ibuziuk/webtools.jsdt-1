@@ -99,8 +99,7 @@ public class InfixExpression extends Expression {
 		/** Signed right shift "&gt;&gt;" operator. */
 		public static final Operator RIGHT_SHIFT_SIGNED = new Operator(">>");//$NON-NLS-1$
 		/** Unsigned right shift "&gt;&gt;&gt;" operator. */
-		public static final Operator RIGHT_SHIFT_UNSIGNED =
-			new Operator(">>>");//$NON-NLS-1$
+		public static final Operator RIGHT_SHIFT_UNSIGNED = new Operator(">>>");//$NON-NLS-1$
 		/** Less than "&lt;" operator. */
 		public static final Operator LESS = new Operator("<");//$NON-NLS-1$
 		/** Greater than "&gt;" operator. */

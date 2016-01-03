@@ -48,6 +48,10 @@ import java.util.List;
  * (repeatedly) as the API evolves.
  */
 public class VariableDeclarationStatement extends Statement {
+	
+	public enum Kind {
+		VAR, LET, CONST;
+	}
 
 	/**
 	 * The "modifiers" structural property of this node type (JLS2 API only).
@@ -81,6 +85,12 @@ public class VariableDeclarationStatement extends Statement {
 		new ChildListPropertyDescriptor(VariableDeclarationStatement.class, "fragments", VariableDeclarationFragment.class, CYCLE_RISK); //$NON-NLS-1$
 
 	/**
+	 * the kind structurl property.
+	 */
+	public static final SimplePropertyDescriptor KIND_PROPERTY = 
+				new SimplePropertyDescriptor(VariableDeclarationStatement.class, "kind", Kind.class, MANDATORY); //$NON-NLS-1$
+
+	/**
 	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
@@ -97,19 +107,21 @@ public class VariableDeclarationStatement extends Statement {
 	private static final List PROPERTY_DESCRIPTORS_3_0;
 
 	static {
-		List propertyList = new ArrayList(4);
+		List propertyList = new ArrayList(5);
 		createPropertyList(VariableDeclarationStatement.class, propertyList);
 		addProperty(MODIFIERS_PROPERTY, propertyList);
 		addProperty(TYPE_PROPERTY, propertyList);
 		addProperty(FRAGMENTS_PROPERTY, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
+		addProperty(KIND_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
 
-		propertyList = new ArrayList(4);
+		propertyList = new ArrayList(5);
 		createPropertyList(VariableDeclarationStatement.class, propertyList);
 		addProperty(MODIFIERS2_PROPERTY, propertyList);
 		addProperty(TYPE_PROPERTY, propertyList);
 		addProperty(FRAGMENTS_PROPERTY, propertyList);
+		addProperty(KIND_PROPERTY, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
@@ -146,6 +158,8 @@ public class VariableDeclarationStatement extends Statement {
 	 * Defaults to none. Not used in JLS3.
 	 */
 	private int modifierFlags = Modifier.NONE;
+	
+	private Kind kind = Kind.VAR;
 
 
 	JSdoc optionalDocComment = null;
@@ -379,6 +393,16 @@ public class VariableDeclarationStatement extends Statement {
 		this.modifierFlags = pmodifiers;
 		postValueChange(MODIFIERS_PROPERTY);
 	}
+	
+	public Kind getKind() {
+		return kind;
+	}
+
+	public void setKind(Kind kind) {
+		preValueChange(KIND_PROPERTY);
+		this.kind = kind;
+		postValueChange(KIND_PROPERTY);
+	}
 
 	/**
 	 * Returns the base type declared in this variable declaration statement.
@@ -443,7 +467,7 @@ public class VariableDeclarationStatement extends Statement {
 	 * Method declared on ASTNode.
 	 */
 	int memSize() {
-		return super.memSize() + 4 * 4;
+		return super.memSize() + 5 * 4;
 	}
 
 	/* (omit javadoc for this method)
@@ -486,6 +510,7 @@ public class VariableDeclarationStatement extends Statement {
 	final ChildPropertyDescriptor internalJavadocProperty() {
 		return JAVADOC_PROPERTY;
 	}
+
 
 }
 

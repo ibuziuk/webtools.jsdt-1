@@ -1336,6 +1336,54 @@ public abstract class ASTVisitor {
 	}
 
 	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
+	 */
+	public boolean visit(YieldExpression yieldExpression) {
+		return true;
+	}
+	
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
+	 */
+	public boolean visit(ArrowFunctionExpression arrowFunctionExpression) {
+		return true;
+	}
+	
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
+	 */
+	public boolean visit(DebuggerStatement debuggerStatement) {
+		return true;
+	}
+	
+	/**
 	 * End of visit the given type-specific AST node.
 	 * <p>
 	 * The default implementation does nothing. Subclasses may reimplement.
@@ -2208,5 +2256,44 @@ public abstract class ASTVisitor {
 	public void endVisit(FunctionExpression node) {
 		// default implementation: do nothing
 	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 */
+	public void endVisit(YieldExpression yieldExpression) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 */
+	public void endVisit(ArrowFunctionExpression arrowFunctionExpression) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 */
+	public void endVisit(DebuggerStatement debuggerStatement) {
+		// default implementation: do nothing
+	}
+
+
+
 
 }

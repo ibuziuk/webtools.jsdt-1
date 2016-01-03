@@ -1505,6 +1505,28 @@ public final class AST {
 	 * By default, there are no modifiers and the base type is unspecified
 	 * (but legal).
 	 * <p>
+	 *
+	 * @return a new unparented variable declaration statement node
+	 * @exception IllegalArgumentException if:
+	 * <ul>
+	 * <li>the node belongs to a different AST</li>
+	 * <li>the node already has a parent</li>
+	 * <li>a cycle in would be created</li>
+	 * </ul>
+	 */
+	public VariableDeclarationStatement
+			newVariableDeclarationStatement() {
+		VariableDeclarationStatement result =
+			new VariableDeclarationStatement(this);
+		return result;
+	}
+	
+	/**
+	 * Creates a new unparented local variable declaration statement node
+	 * owned by this AST, for the given variable declaration fragment.
+	 * By default, there are no modifiers and the base type is unspecified
+	 * (but legal).
+	 * <p>
 	 * This method can be used to convert a variable declaration fragment
 	 * (<code>VariableDeclarationFragment</code>) into a statement
 	 * (<code>Statement</code>) by wrapping it. Additional variable
@@ -1522,12 +1544,12 @@ public final class AST {
 	 * </ul>
 	 */
 	public VariableDeclarationStatement
-			newVariableDeclarationStatement(VariableDeclarationFragment fragment) {
+	newVariableDeclarationStatement(VariableDeclarationFragment fragment) {
 		if (fragment == null) {
 			throw new IllegalArgumentException();
 		}
 		VariableDeclarationStatement result =
-			new VariableDeclarationStatement(this);
+					new VariableDeclarationStatement(this);
 		result.fragments().add(fragment);
 		return result;
 	}
@@ -1644,6 +1666,24 @@ public final class AST {
 	public ExpressionStatement newExpressionStatement(Expression expression) {
 		ExpressionStatement result = new ExpressionStatement(this);
 		result.setExpression(expression);
+		return result;
+	}
+
+	/**
+	 * Creates a new unparented expression statement node owned by this AST,
+	 * for the given expression.
+	 * <p>
+	 *
+	 * @return a new unparented statement node
+	 * @exception IllegalArgumentException if:
+	 * <ul>
+	 * <li>the node belongs to a different AST</li>
+	 * <li>the node already has a parent</li>
+	 * <li>a cycle in would be created</li>
+	 * </ul>
+	 */
+	public ExpressionStatement newExpressionStatement() {
+		ExpressionStatement result = new ExpressionStatement(this);
 		return result;
 	}
 
@@ -1820,6 +1860,20 @@ public final class AST {
 		return new StringLiteral(this);
 	}
 
+	/**
+	 * Creates and returns a new unparented string literal node for
+	 * the given string literal.
+	 *
+	 * @return a new unparented string literal node
+	 */
+	public StringLiteral newStringLiteral(String literal) {
+		if(literal == null ){
+			throw new IllegalArgumentException();
+		}
+		StringLiteral result = new StringLiteral(this);
+		result.setLiteralValue(literal);
+		return result;
+	}
 
 	/**
 	 * Creates and returns a new unparented character literal node.
@@ -1832,16 +1886,32 @@ public final class AST {
 	}
 
 
+	/**
+	 * Creates and returns a new Regular Expression literal node.
+	 * Initially the node has an unspecified character literal.
+	 *
+	 * @return a new unparented regular expression literal node
+	 */	
+	public RegularExpressionLiteral newRegularExpressionLiteral() {
+		return new RegularExpressionLiteral(this);
+	}
 
 	/**
 	 * Creates and returns a new Regular Expression literal node.
 	 * Initially the node has an unspecified character literal.
 	 *
 	 * @return a new unparented regular expression literal node
-	 */	public RegularExpressionLiteral newRegularExpressionLiteral() {
-		return new RegularExpressionLiteral(this);
+	 */	
+	public RegularExpressionLiteral newRegularExpressionLiteral(String literal) {
+		if(literal == null ){
+			throw new IllegalArgumentException();
+		}
+		RegularExpressionLiteral result = new RegularExpressionLiteral(this);
+		result.setRegularExpression(literal);
+		return result;
 	}
-/**
+	 
+	 /**
 	 * Creates and returns a new unparented number literal node.
 	 *
 	 * @param literal the token for the numeric literal as it would
@@ -1909,6 +1979,19 @@ public final class AST {
 		BooleanLiteral result = new BooleanLiteral(this);
 		result.setBooleanValue(value);
 		return result;
+	}
+	
+	/**
+	 * Creates and returns a new unparented boolean literal node.
+	 *
+	 * @param value a string that is parseable to boolean
+	 * @return a new unparented boolean literal node
+	 */
+	public BooleanLiteral newBooleanLiteral(String value) {
+		if(value == null ){
+			throw new IllegalArgumentException();
+		}
+		return newBooleanLiteral(Boolean.parseBoolean(value));
 	}
 
 	/**
@@ -2015,12 +2098,12 @@ public final class AST {
 	 * </ul>
 	 */
 	public VariableDeclarationExpression
-			newVariableDeclarationExpression(VariableDeclarationFragment fragment) {
+	newVariableDeclarationExpression(VariableDeclarationFragment fragment) {
 		if (fragment == null) {
 			throw new IllegalArgumentException();
 		}
 		VariableDeclarationExpression result =
-			new VariableDeclarationExpression(this);
+					new VariableDeclarationExpression(this);
 		result.fragments().add(fragment);
 		return result;
 	}
@@ -2143,6 +2226,24 @@ public final class AST {
 	}
 
 	/**
+	 * Creates and returns a new unparented object literal field expression node
+	 * owned by this AST. 
+	 *
+	 * @param key usually a literal
+ 	 * @param value an expression
+	 * @return a new unparented object literal field expression node
+	 */
+	public ObjectLiteralField newObjectLiteralField(Expression key, Expression value) {
+		if(key == null || value == null ){
+			throw new IllegalArgumentException();
+		}
+		ObjectLiteralField result = new ObjectLiteralField(this);
+		result.setFieldName(key);
+		result.setInitializer(value);
+		return result;
+	}
+	
+	/**
 	 * Creates and returns a new unparented parenthesized expression node
 	 * owned by this AST. By default, the expression is unspecified (but legal).
 	 *
@@ -2153,6 +2254,22 @@ public final class AST {
 		return result;
 	}
 
+	/**
+	 * Creates and returns a new unparented parenthesized expression node
+	 * owned by this AST. By default, the expression is unspecified (but legal).
+	 *
+	 *@param the expression included in parantheses
+	 * @return a new unparented parenthesized expression node
+	 */
+	public ParenthesizedExpression newParenthesizedExpression(Expression expression) {
+		if(expression == null ){
+			throw new IllegalArgumentException();
+		}
+		ParenthesizedExpression result = new ParenthesizedExpression(this);
+		result.setExpression(expression);
+		return result;
+	}
+	
 	/**
 	 * Creates and returns a new unparented infix expression node
 	 * owned by this AST. By default, the operator and left and right
@@ -2262,6 +2379,7 @@ public final class AST {
 		ArrayInitializer result = new ArrayInitializer(this);
 		return result;
 	}
+	
 
 	/**
 	 * Creates and returns a new unparented conditional expression node
@@ -2272,6 +2390,40 @@ public final class AST {
 	 */
 	public ConditionalExpression newConditionalExpression() {
 		ConditionalExpression result = new ConditionalExpression(this);
+		return result;
+	}
+	
+	/**
+	 * Creates and returns a new unparented yield expression node
+	 * owned by this AST. By default, the argument is unspecified 
+	 * (but Legal)
+	 *
+	 * @return a new unparented yield expression node
+	 */
+	public YieldExpression newYieldExpression() {
+		YieldExpression result = new YieldExpression(this);
+		return result;
+	}
+	
+	/**
+	 * Creates and returns a new unparented arrow expression node
+	 * owned by this AST.
+	 *
+	 * @return a new unparented arrow expression node
+	 */
+	public ArrowFunctionExpression newArrowFunctionExpression() {
+		ArrowFunctionExpression result = new ArrowFunctionExpression(this);
+		return result;
+	}
+	
+	/**
+	 * Creates and returns a new unparented debugger statement node
+	 * owned by this AST.
+	 *
+	 * @return a new unparented debugger statement node
+	 */	
+	public DebuggerStatement newDebuggerStatement() {
+		DebuggerStatement result = new DebuggerStatement(this);
 		return result;
 	}
 
@@ -2367,6 +2519,10 @@ public final class AST {
 	void setFlag(int newValue) {
 		this.bits |= newValue;
 	}
+
+
+
+
 
 }
 
