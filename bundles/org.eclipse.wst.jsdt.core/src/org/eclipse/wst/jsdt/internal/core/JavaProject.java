@@ -780,9 +780,10 @@ public class JavaProject
 	 * Configure the project with Java nature.
 	 */
 	public void configure() throws CoreException {
-
-		// register Java builder
-		addToBuildSpec(JavaScriptCore.BUILDER_ID);
+		// register Validation builder
+		// Avoiding new projects to have the old JS builder, 
+		// instead make them use the Validator builder		
+		addToBuildSpec(JavaScriptCore.VALIDATION_BUILDER_ID);
 	}
 
 	/*
@@ -1010,12 +1011,9 @@ public class JavaProject
 	 * Removes the Java nature from the project.
 	 */
 	public void deconfigure() throws CoreException {
-
-		// deregister Java builder
-		removeFromBuildSpec(JavaScriptCore.BUILDER_ID);
-
-		// remove .classpath file
-//		getProject().getFile(ClasspathHelper.CLASSPATH_FILENAME).delete(false, null);
+		// deregister any builder
+		removeFromBuildSpec(JavaScriptCore.BUILDER_ID); // For backwards compatibility
+		removeFromBuildSpec(JavaScriptCore.VALIDATION_BUILDER_ID);
 	}
 
 	/**

@@ -14,7 +14,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,7 +25,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,9 +41,10 @@ import org.eclipse.wst.jsdt.internal.core.JavaModel;
 import org.eclipse.wst.jsdt.internal.core.JavaModelManager;
 import org.eclipse.wst.jsdt.internal.core.JavaProject;
 import org.eclipse.wst.jsdt.internal.core.util.Messages;
-import org.eclipse.wst.jsdt.internal.core.util.Util;
+import org.eclipse.wst.validation.internal.operations.ValidationBuilder;
 
-public class JavaBuilder extends IncrementalProjectBuilder {
+@SuppressWarnings("restriction")
+public class JavaBuilder extends ValidationBuilder {
 
 IProject currentProject;
 JavaProject javaProject;
@@ -173,112 +172,9 @@ public static void writeState(Object state, DataOutputStream out) throws IOExcep
 	((State) state).write(out);
 }
 
-protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) throws CoreException {
-	this.currentProject = getProject();
-	if (currentProject == null || !currentProject.isAccessible()) return new IProject[0];
-
-	if (DEBUG)
-		System.out.println("\nStarting build of " + currentProject.getName() //$NON-NLS-1$
-			+ " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
-	this.notifier = new BuildNotifier(monitor, currentProject);
-	notifier.begin();
-	boolean ok = false;
-	try {
-		notifier.checkCancel();
-		kind = initializeBuilder(kind, true);
-
-		if (isWorthBuilding()) {
-			if (kind == FULL_BUILD) {
-				if (DEBUG)
-					System.out.println("Performing full build as requested by user"); //$NON-NLS-1$
-				buildAll();
-			} else {
-				if ((this.lastState = getLastState(currentProject)) == null) {
-					if (DEBUG)
-						System.out.println("Performing full build since last saved state was not found"); //$NON-NLS-1$
-					buildAll();
-				} else if (hasClasspathChanged()) {
-					// if the output location changes, do not delete the binary files from old location
-					// the user may be trying something
-					if (DEBUG)
-						System.out.println("Performing full build since classpath has changed"); //$NON-NLS-1$
-					buildAll();
-				} else if (nameEnvironment.sourceLocations.length > 0) {
-					// if there is no source to compile & no classpath changes then we are done
-					SimpleLookupTable deltas = findDeltas();
-					if (deltas == null) {
-						if (DEBUG)
-							System.out.println("Performing full build since deltas are missing after incremental request"); //$NON-NLS-1$
-						buildAll();
-					} else if (deltas.elementSize > 0) {
-						buildDeltas(deltas);
-					} else if (DEBUG) {
-						System.out.println("Nothing to build since deltas were empty"); //$NON-NLS-1$
-					}
-				} else {
-					if (hasStructuralDelta()) { // double check that a jar file didn't get replaced in a binary project
-						if (DEBUG)
-							System.out.println("Performing full build since there are structural deltas"); //$NON-NLS-1$
-						buildAll();
-					} else {
-						if (DEBUG)
-							System.out.println("Nothing to build since there are no source folders and no deltas"); //$NON-NLS-1$
-						lastState.tagAsNoopBuild();
-					}
-				}
-			}
-			ok = true;
-		}
-	} catch (CoreException e) {
-		Util.log(e, "JavaBuilder handling CoreException while building: " + currentProject.getName()); //$NON-NLS-1$
-		IMarker marker = currentProject.createMarker(IJavaScriptModelMarker.JAVASCRIPT_MODEL_PROBLEM_MARKER);
-		marker.setAttributes(
-			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IJavaScriptModelMarker.CATEGORY_ID, IMarker.SOURCE_ID},
-			new Object[] {
-				Messages.bind(Messages.build_inconsistentProject, e.getLocalizedMessage()),
-				Integer.valueOf(IMarker.SEVERITY_ERROR),
-				Integer.valueOf(CategorizedProblem.CAT_BUILDPATH),
-				JavaBuilder.SOURCE_ID
-			}
-		);
-	} catch (ImageBuilderInternalException e) {
-		Util.log(e.getThrowable(), "JavaBuilder handling ImageBuilderInternalException while building: " + currentProject.getName()); //$NON-NLS-1$
-		IMarker marker = currentProject.createMarker(IJavaScriptModelMarker.JAVASCRIPT_MODEL_PROBLEM_MARKER);
-		marker.setAttributes(
-			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IJavaScriptModelMarker.CATEGORY_ID, IMarker.SOURCE_ID},
-			new Object[] {
-				Messages.bind(Messages.build_inconsistentProject, e.getLocalizedMessage()),
-				Integer.valueOf(IMarker.SEVERITY_ERROR),
-				Integer.valueOf(CategorizedProblem.CAT_BUILDPATH),
-				JavaBuilder.SOURCE_ID
-			}
-		);
-	} catch (MissingSourceFileException e) {
-		// do not log this exception since its thrown to handle aborted compiles because of missing source files
-		if (DEBUG)
-			System.out.println(Messages.bind(Messages.build_missingSourceFile, e.missingSourceFile));
-		removeProblemsAndTasksFor(currentProject); // make this the only problem for this project
-		IMarker marker = currentProject.createMarker(IJavaScriptModelMarker.JAVASCRIPT_MODEL_PROBLEM_MARKER);
-		marker.setAttributes(
-			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IMarker.SOURCE_ID},
-			new Object[] {
-				Messages.bind(Messages.build_missingSourceFile, e.missingSourceFile),
-				Integer.valueOf(IMarker.SEVERITY_ERROR),
-				JavaBuilder.SOURCE_ID
-			}
-		);
-	} finally {
-		if (!ok)
-			// If the build failed, clear the previously built state, forcing a full build next time.
-			clearLastState();
-		notifier.done();
-		cleanup();
-	}
-	IProject[] requiredProjects = getRequiredProjects(true);
-	if (DEBUG)
-		System.out.println("Finished build of " + currentProject.getName() //$NON-NLS-1$
-			+ " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
-	return requiredProjects;
+public IProject[] build(int kind, Map ignored, IProgressMonitor monitor) {
+	// Simply rely on the ValidationBuilder behavior
+	return super.build(kind, ignored, monitor);
 }
 
 private void buildAll() {
@@ -309,41 +205,7 @@ private void buildDeltas(SimpleLookupTable deltas) {
 }
 
 protected void clean(IProgressMonitor monitor) throws CoreException {
-	this.currentProject = getProject();
-	if (currentProject == null || !currentProject.isAccessible()) return;
-
-	if (DEBUG)
-		System.out.println("\nCleaning " + currentProject.getName() //$NON-NLS-1$
-			+ " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
-	this.notifier = new BuildNotifier(monitor, currentProject);
-	notifier.begin();
-	try {
-		notifier.checkCancel();
-
-		initializeBuilder(CLEAN_BUILD, true);
-		if (DEBUG)
-			System.out.println("Clearing last state as part of clean : " + lastState); //$NON-NLS-1$
-		clearLastState();
-		removeProblemsAndTasksFor(currentProject);
-//		new BatchImageBuilder(this, false).cleanOutputFolders(false);
-	} catch (CoreException e) {
-		Util.log(e, "JavaBuilder handling CoreException while cleaning: " + currentProject.getName()); //$NON-NLS-1$
-		IMarker marker = currentProject.createMarker(IJavaScriptModelMarker.JAVASCRIPT_MODEL_PROBLEM_MARKER);
-		marker.setAttributes(
-			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IMarker.SOURCE_ID},
-			new Object[] {
-				Messages.bind(Messages.build_inconsistentProject, e.getLocalizedMessage()),
-				Integer.valueOf(IMarker.SEVERITY_ERROR),
-				JavaBuilder.SOURCE_ID
-			}
-		);
-	} finally {
-		notifier.done();
-		cleanup();
-	}
-	if (DEBUG)
-		System.out.println("Finished cleaning " + currentProject.getName() //$NON-NLS-1$
-			+ " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
+	super.clean(monitor);
 }
 
 private void cleanup() {
