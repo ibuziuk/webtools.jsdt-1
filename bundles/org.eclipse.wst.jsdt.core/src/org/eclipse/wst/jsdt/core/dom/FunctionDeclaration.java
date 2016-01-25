@@ -144,6 +144,12 @@ public class FunctionDeclaration extends BodyDeclaration {
 	 */
 	public static final ChildPropertyDescriptor BODY_PROPERTY =
 		new ChildPropertyDescriptor(FunctionDeclaration.class, "body", Block.class, OPTIONAL, CYCLE_RISK); //$NON-NLS-1$
+	
+	/**
+	 * The "generator" property 
+	 */
+	public static final SimplePropertyDescriptor GENERATOR_PROPERTY = 
+				new SimplePropertyDescriptor(FunctionDeclaration.class, "generator", boolean.class, MANDATORY); //$NON-NLS-1$
 
 	/**
 	 * A list of property descriptors (element type:
@@ -162,7 +168,7 @@ public class FunctionDeclaration extends BodyDeclaration {
 	private static final List PROPERTY_DESCRIPTORS_3_0;
 
 	static {
-		List propertyList = new ArrayList(10);
+		List propertyList = new ArrayList(11);
 		createPropertyList(FunctionDeclaration.class, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
 		addProperty(MODIFIERS_PROPERTY, propertyList);
@@ -173,9 +179,10 @@ public class FunctionDeclaration extends BodyDeclaration {
 		addProperty(EXTRA_DIMENSIONS_PROPERTY, propertyList);
 		addProperty(THROWN_EXCEPTIONS_PROPERTY, propertyList);
 		addProperty(BODY_PROPERTY, propertyList);
+		addProperty(GENERATOR_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
 
-		propertyList = new ArrayList(11);
+		propertyList = new ArrayList(12);
 		createPropertyList(FunctionDeclaration.class, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
 		addProperty(MODIFIERS2_PROPERTY, propertyList);
@@ -186,6 +193,7 @@ public class FunctionDeclaration extends BodyDeclaration {
 		addProperty(EXTRA_DIMENSIONS_PROPERTY, propertyList);
 		addProperty(THROWN_EXCEPTIONS_PROPERTY, propertyList);
 		addProperty(BODY_PROPERTY, propertyList);
+		addProperty(GENERATOR_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
 
@@ -260,6 +268,11 @@ public class FunctionDeclaration extends BodyDeclaration {
 	 * Defaults to none.
 	 */
 	private Block optionalBody = null;
+	
+	/**
+	 * Indicates if the function is a generator function.
+	 */
+	private boolean isGenerator;
 
 	/**
 	 * Creates a new AST node for a method declaration owned
@@ -324,6 +337,15 @@ public class FunctionDeclaration extends BodyDeclaration {
 				return false;
 			}
 		}
+		if (property == GENERATOR_PROPERTY) {
+			if (get) {
+				return isGenerator();
+			} else {
+				setGenerator(value);
+				return false;
+			}
+		}
+		
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
 	}
@@ -440,6 +462,7 @@ public class FunctionDeclaration extends BodyDeclaration {
 					(Type) ASTNode.copySubtree(target, getReturnType2()));
 		}
 		result.setConstructor(isConstructor());
+		result.setGenerator(isGenerator());
 		result.setExtraDimensions(getExtraDimensions());
 		
 		SimpleName name = getName();
@@ -509,6 +532,16 @@ public class FunctionDeclaration extends BodyDeclaration {
 		postValueChange(CONSTRUCTOR_PROPERTY);
 	}
 
+	public boolean isGenerator() {
+		return this.isGenerator;
+	}
+
+	public void setGenerator(boolean isGenerator) {
+		preValueChange(GENERATOR_PROPERTY);
+		this.isGenerator = isGenerator;
+		postValueChange(GENERATOR_PROPERTY);
+	}
+
 	/**
 	 * Returns the name of the method declared in this method declaration.
 	 * For a constructor declaration, this should be the same as the name
@@ -517,16 +550,6 @@ public class FunctionDeclaration extends BodyDeclaration {
 	 * @return the method name node
 	 */
 	public SimpleName getName() {
-//		if (this.methodName == null) {
-//			// lazy init must be thread-safe for readers
-//			synchronized (this) {
-//				if (this.methodName == null) {
-//					preLazyInit();
-//					this.methodName = new SimpleName(this.ast);
-//					postLazyInit(this.methodName, NAME_PROPERTY);
-//				}
-//			}
-//		}
 		return this.methodName;
 	}
 
@@ -850,7 +873,7 @@ public class FunctionDeclaration extends BodyDeclaration {
 	 * Method declared on ASTNode.
 	 */
 	int memSize() {
-		return super.memSize() + 9 * 4;
+		return super.memSize() + 10 * 4;
 	}
 
 	/* (omit javadoc for this method)

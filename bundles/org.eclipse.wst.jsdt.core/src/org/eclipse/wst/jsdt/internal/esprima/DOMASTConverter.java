@@ -33,6 +33,9 @@ import org.eclipse.wst.jsdt.core.dom.EmptyStatement;
 import org.eclipse.wst.jsdt.core.dom.Expression;
 import org.eclipse.wst.jsdt.core.dom.ExpressionStatement;
 import org.eclipse.wst.jsdt.core.dom.FieldAccess;
+import org.eclipse.wst.jsdt.core.dom.ForInStatement;
+import org.eclipse.wst.jsdt.core.dom.ForOfStatement;
+import org.eclipse.wst.jsdt.core.dom.ForStatement;
 import org.eclipse.wst.jsdt.core.dom.FunctionDeclaration;
 import org.eclipse.wst.jsdt.core.dom.FunctionExpression;
 import org.eclipse.wst.jsdt.core.dom.FunctionInvocation;
@@ -57,9 +60,10 @@ import org.eclipse.wst.jsdt.core.dom.ThisExpression;
 import org.eclipse.wst.jsdt.core.dom.ThrowStatement;
 import org.eclipse.wst.jsdt.core.dom.TryStatement;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclaration;
+import org.eclipse.wst.jsdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.wst.jsdt.core.dom.VariableDeclarationStatement.Kind;
+import org.eclipse.wst.jsdt.core.dom.VariableKind;
 import org.eclipse.wst.jsdt.core.dom.WhileStatement;
 import org.eclipse.wst.jsdt.core.dom.WithStatement;
 import org.eclipse.wst.jsdt.core.dom.YieldExpression;
@@ -111,6 +115,8 @@ public class DOMASTConverter extends EStreeVisitor{
 				return convertVariableDeclaration(object);
 			case VariableDeclarator:
 				return convertVariableDeclarator(object);
+			case FunctionDeclaration:
+				return convertFunctionDeclaration(object);
 		    //Statements
 			case ExpressionStatement:
 				return convertExpressionStatement(object);
@@ -146,6 +152,12 @@ public class DOMASTConverter extends EStreeVisitor{
 				return convertWhileStatement(object);
 			case DoWhileStatement:
 				return convertDoWhileStatement(object);
+			case ForStatement:
+				return convertForStatement(object);
+			case ForInStatement:
+				return convertForInStatement(object);
+			case ForOfStatement:
+				return convertForOfStatement(object);
 			// Expressions	
 			case ThisExpression:
 				return convertThisExpression(object);
@@ -184,7 +196,6 @@ public class DOMASTConverter extends EStreeVisitor{
 				
 		}
 	}
-
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.wst.jsdt.internal.esprima.EStreeVisitor#endVisit(jdk.nashorn.api.scripting.ScriptObjectMirror, org.eclipse.wst.jsdt.internal.esprima.ESTreeNodeTypes)
@@ -242,6 +253,10 @@ public class DOMASTConverter extends EStreeVisitor{
 				//assign to contained FunctionDeclaration
 				fe.getMethod().setBody((Block) statement);
 				break;
+			case FUNCTION_DECLARATION:
+				FunctionDeclaration fdec = (FunctionDeclaration)parent;
+				fdec.setBody((Block)statement);
+				break;
 			case ARROW_FUNCTION_EXPRESSION:
 				ArrowFunctionExpression af = (ArrowFunctionExpression) parent;
 				af.setBody((Block)statement);
@@ -297,6 +312,26 @@ public class DOMASTConverter extends EStreeVisitor{
 				DoStatement ds = (DoStatement)parent;
 				ds.setBody(statement);
 				break;
+			case FOR_STATEMENT:
+				ForStatement fs = (ForStatement)parent;
+				fs.setBody(statement);
+				break;
+			case FOR_IN_STATEMENT:
+				ForInStatement fis = (ForInStatement)parent;
+				if("left".equals(key)){
+					fis.setIterationVariable(statement);
+				}else if("body".equals(key)){
+					fis.setBody(statement);
+				}
+				break;
+			case FOR_OF_STATEMENT:
+				ForOfStatement fos = (ForOfStatement)parent;
+				if("left".equals(key)){
+					fos.setIterationVariable(statement);
+				}else if("body".equals(key)){
+					fos.setBody(statement);
+				}
+				break;
 			default:
 				throw new UnimplementedException("Assigning "+statement + " to "+parent+ " is not handled");	
 				}
@@ -313,6 +348,10 @@ public class DOMASTConverter extends EStreeVisitor{
 			case FUNCTION_EXPRESSION:
 				FunctionExpression fe = (FunctionExpression)parent;
 				fe.getMethod().parameters().add((SingleVariableDeclaration)declaration);
+				break;
+			case VARIABLE_DECLARATION_EXPRESSION:
+				VariableDeclarationExpression ve = (VariableDeclarationExpression)parent;
+				ve.fragments().add(declaration);
 				break;
 			default:
 				throw new UnimplementedException("Assigning "+ declaration + " to "+parent+ " is not handled");	
@@ -356,7 +395,17 @@ public class DOMASTConverter extends EStreeVisitor{
 			case FUNCTION_EXPRESSION:
 				FunctionExpression fe = (FunctionExpression)parent;
 				//assign to contained FunctionDeclaration
-				fe.getMethod().setName((SimpleName) expression);
+				if("params".equals(key)){
+					fe.getMethod().parameters().add(expression);
+				}else{
+					fe.getMethod().setName((SimpleName) expression);
+				}
+				break;
+			case FUNCTION_DECLARATION:
+				FunctionDeclaration fdec = (FunctionDeclaration)parent;
+				if("params".equals(key)){
+					fdec.parameters().add(expression);
+				}
 				break;
 			case POSTFIX_EXPRESSION:
 				((PostfixExpression)parent).setOperand(expression);
@@ -478,6 +527,33 @@ public class DOMASTConverter extends EStreeVisitor{
 				DoStatement ds = (DoStatement)parent;
 				ds.setExpression(expression);
 				break;
+			case FOR_STATEMENT:
+				ForStatement fs=(ForStatement)parent;
+				if("test".equals(key)){
+					fs.setExpression(expression);
+				}else if("init".equals(key))
+				{
+					fs.initializers().add(expression);
+				}else if("update".equals(key)){
+					fs.updaters().add(expression);
+				}
+				break;
+			case FOR_IN_STATEMENT:
+				ForInStatement fis = (ForInStatement)parent;
+				if("left".equals(key)){
+					fis.setIterationVariable(ast.newExpressionStatement(expression));
+				}else if("right".equals(key)){
+					fis.setCollection(expression);
+				}
+				break;
+			case FOR_OF_STATEMENT:
+				ForOfStatement fos = (ForOfStatement)parent;
+				if("left".equals(key)){
+					fos.setIterationVariable(ast.newExpressionStatement(expression));
+				}else if("right".equals(key)){
+					fos.setCollection(expression);
+				}
+				break;
 			default :
 				throw new UnimplementedException("Assigning "+expression + " to "+parent+ " is not handled");	
 		}
@@ -488,9 +564,6 @@ public class DOMASTConverter extends EStreeVisitor{
 		ts.catchClauses().add(current);
 	}
 	
-	
-
-
 	private VisitOptions convertLiteral(final ScriptObjectMirror object) {
 		Object value = object.getMember("value");
 		String raw = (String)object.getMember("raw");
@@ -525,15 +598,21 @@ public class DOMASTConverter extends EStreeVisitor{
 	
 	private VisitOptions convertVariableDeclaration(final ScriptObjectMirror object) {
 		String kind = (String) object.getMember("kind");
-		final VariableDeclarationStatement e = ast.newVariableDeclarationStatement();
+		VariableKind variableKind = VariableKind.VAR;
 		if(kind.equals("let")){
-			e.setKind(Kind.LET);
+			variableKind = VariableKind.LET;
 		}else if(kind.equals("const")){
-			e.setKind(Kind.CONST);
-		}else{
-			e.setKind(Kind.VAR);
+			variableKind = VariableKind.CONST;
 		}
-		nodes.push(e);
+		if(nodes.peek().getNodeType() == FOR_STATEMENT){// For statements use expression
+			final VariableDeclarationExpression e = ast.newVariableDeclarationExpression();	
+			e.setKind(variableKind);
+			nodes.push(e);
+		}else{
+			final VariableDeclarationStatement e = ast.newVariableDeclarationStatement();
+			e.setKind(variableKind);
+			nodes.push(e);
+		}
 		return VisitOptions.CONTINUE;	
 	}
 	
@@ -605,11 +684,20 @@ public class DOMASTConverter extends EStreeVisitor{
 		// to handle this properly
 		FunctionExpression fe = ast.newFunctionExpression();
 		FunctionDeclaration d = ast.newFunctionDeclaration();
+		Boolean isGenerator = (Boolean)object.getMember("generator");
+		d.setGenerator(isGenerator.booleanValue());
 		fe.setMethod(d);
 		nodes.add(fe);
 		return VisitOptions.CONTINUE;
 	}
 	
+	private VisitOptions convertFunctionDeclaration(final ScriptObjectMirror object) {
+		FunctionDeclaration dec = ast.newFunctionDeclaration();
+		Boolean isGenerator = (Boolean)object.getMember("generator");
+		dec.setGenerator(isGenerator.booleanValue());
+		nodes.push(dec);
+		return VisitOptions.CONTINUE;
+	}
 
 	private VisitOptions convertUnaryOperation(final ScriptObjectMirror object) {
 		final Boolean isPrefix = (Boolean) object.getMember("prefix");
@@ -785,4 +873,24 @@ public class DOMASTConverter extends EStreeVisitor{
 		nodes.push(ds);
 		return VisitOptions.CONTINUE;
 	}
+
+	private VisitOptions convertForStatement(final ScriptObjectMirror object) {
+		ForStatement fs = ast.newForStatement();
+		nodes.push(fs);
+		return VisitOptions.CONTINUE;
+	}
+
+	private VisitOptions convertForInStatement(final ScriptObjectMirror object) {
+		ForInStatement fi = ast.newForInStatement();
+		nodes.push(fi);
+		return VisitOptions.CONTINUE;
+	}
+
+	private VisitOptions convertForOfStatement(final ScriptObjectMirror object) {
+		ForOfStatement fo = ast.newForOfStatement();
+		nodes.push(fo);
+		return VisitOptions.CONTINUE;
+	}
+	
+
 }

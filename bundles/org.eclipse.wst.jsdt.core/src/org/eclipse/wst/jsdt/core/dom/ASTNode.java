@@ -657,6 +657,8 @@ public abstract class ASTNode {
 	public static final int YIELD_EXPRESSION = 93;
 	public static final int ARROW_FUNCTION_EXPRESSION = 94;
 	public static final int DEBUGGER_STATEMENT = 95;
+	public static final int FOR_OF_STATEMENT = 96;
+	
 
 
 
@@ -835,6 +837,10 @@ public abstract class ASTNode {
 				return ListExpression.class;
 			case YIELD_EXPRESSION:
 				return YieldExpression.class;
+			case ARROW_FUNCTION_EXPRESSION:
+				return ArrowFunctionExpression.class;
+			case DEBUGGER_STATEMENT:
+				return DebuggerStatement.class;
 		}
 		throw new IllegalArgumentException();
 	}

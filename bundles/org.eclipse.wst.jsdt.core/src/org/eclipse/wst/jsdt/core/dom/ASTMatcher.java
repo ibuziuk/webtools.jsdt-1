@@ -788,6 +788,23 @@ public class ASTMatcher {
 				&& safeSubtreeMatch(node.getCollection(), o.getCollection())
 				&& safeSubtreeMatch(node.getBody(), o.getBody()));
 	}
+	
+	/**
+	 * @param forOfStatement
+	 * @param other
+	 * @return
+	 */
+	public boolean match(ForOfStatement node, Object other) {
+		if(!(other instanceof ForOfStatement)){
+			return false;
+		}
+		ForOfStatement o = (ForOfStatement) other;
+		return (
+				safeSubtreeMatch(node.getIterationVariable(), o.getIterationVariable())
+				&& safeSubtreeMatch(node.getCollection(), o.getCollection())
+				&& safeSubtreeMatch(node.getBody(), o.getBody()));
+
+	}
 
 	/**
 	 * Returns whether the given node and the other object match.
@@ -2127,5 +2144,7 @@ public class ASTMatcher {
 	public boolean match(DebuggerStatement debuggerStatement, Object other) {
 		return (other instanceof DebuggerStatement);
 	}
+
+
 
 }

@@ -49,10 +49,6 @@ import java.util.List;
  */
 public class VariableDeclarationStatement extends Statement {
 	
-	public enum Kind {
-		VAR, LET, CONST;
-	}
-
 	/**
 	 * The "modifiers" structural property of this node type (JLS2 API only).
 	 *  
@@ -85,10 +81,10 @@ public class VariableDeclarationStatement extends Statement {
 		new ChildListPropertyDescriptor(VariableDeclarationStatement.class, "fragments", VariableDeclarationFragment.class, CYCLE_RISK); //$NON-NLS-1$
 
 	/**
-	 * the kind structurl property.
+	 * the kind structured property as introduced in Ecmascript 2015 
 	 */
 	public static final SimplePropertyDescriptor KIND_PROPERTY = 
-				new SimplePropertyDescriptor(VariableDeclarationStatement.class, "kind", Kind.class, MANDATORY); //$NON-NLS-1$
+				new SimplePropertyDescriptor(VariableDeclarationStatement.class, "kind", VariableKind.class, MANDATORY); //$NON-NLS-1$
 
 	/**
 	 * A list of property descriptors (element type:
@@ -159,7 +155,7 @@ public class VariableDeclarationStatement extends Statement {
 	 */
 	private int modifierFlags = Modifier.NONE;
 	
-	private Kind kind = Kind.VAR;
+	private VariableKind kind = VariableKind.VAR;
 
 
 	JSdoc optionalDocComment = null;
@@ -282,6 +278,7 @@ public class VariableDeclarationStatement extends Statement {
 		result.setType((Type) getType().clone(target));
 		result.setJavadoc(
 				(JSdoc) ASTNode.copySubtree(target, getJavadoc()));
+		result.setKind(getKind());
 		result.fragments().addAll(
 			ASTNode.copySubtrees(target, fragments()));
 		return result;
@@ -394,11 +391,11 @@ public class VariableDeclarationStatement extends Statement {
 		postValueChange(MODIFIERS_PROPERTY);
 	}
 	
-	public Kind getKind() {
+	public VariableKind getKind() {
 		return kind;
 	}
 
-	public void setKind(Kind kind) {
+	public void setKind(VariableKind kind) {
 		preValueChange(KIND_PROPERTY);
 		this.kind = kind;
 		postValueChange(KIND_PROPERTY);

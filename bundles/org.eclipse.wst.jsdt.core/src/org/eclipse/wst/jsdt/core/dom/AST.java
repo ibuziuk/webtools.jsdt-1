@@ -1835,6 +1835,17 @@ public final class AST {
 	public ForInStatement newForInStatement() {
 		return new ForInStatement(this);
 	}
+	
+	/**
+	 * Creates a new unparented for..of statement node owned by this AST.
+	 * By default, there are no initializers, no condition expression,
+	 * no updaters, and the body is an empty block.
+	 *
+	 * @return a new unparented for..of statement node
+	 */
+	public ForOfStatement newForOfStatement() {
+		return new ForOfStatement(this);
+	}
 
 	/*
 	 * Creates a new unparented enhanced for statement node owned by this AST.
@@ -2105,6 +2116,34 @@ public final class AST {
 		VariableDeclarationExpression result =
 					new VariableDeclarationExpression(this);
 		result.fragments().add(fragment);
+		return result;
+	}
+	/**
+	 * Creates a new unparented local variable declaration expression node
+	 * owned by this AST, for the given variable declaration fragment. By
+	 * default, there are no modifiers and the base type is unspecified
+	 * (but legal).
+	 * <p>
+	 * This method can be used to convert a variable declaration fragment
+	 * (<code>VariableDeclarationFragment</code>) into an expression
+	 * (<code>Expression</code>) by wrapping it. Additional variable
+	 * declaration fragments can be added afterwards.
+	 * </p>
+	 *
+	 * @return a new unparented variable declaration expression node
+	 * @exception IllegalArgumentException if:
+	 * <ul>
+	 * <li>the node belongs to a different AST</li>
+	 * <li>the node already has a parent</li>
+	 * <li>a cycle in would be created</li>
+	 * <li>the given fragment is null</li>
+	 * <li>a cycle in would be created</li>
+	 * </ul>
+	 */
+	public VariableDeclarationExpression
+	newVariableDeclarationExpression() {
+		VariableDeclarationExpression result =
+					new VariableDeclarationExpression(this);
 		return result;
 	}
 
