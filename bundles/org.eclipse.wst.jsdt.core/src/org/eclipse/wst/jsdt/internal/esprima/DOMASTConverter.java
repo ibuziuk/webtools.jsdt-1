@@ -13,6 +13,7 @@ package org.eclipse.wst.jsdt.internal.esprima;
 import static org.eclipse.wst.jsdt.core.dom.ASTNode.*;
 
 import java.util.Stack;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.wst.jsdt.core.UnimplementedException;
 import org.eclipse.wst.jsdt.core.dom.AST;
@@ -44,7 +45,6 @@ import org.eclipse.wst.jsdt.core.dom.InfixExpression;
 import org.eclipse.wst.jsdt.core.dom.JavaScriptUnit;
 import org.eclipse.wst.jsdt.core.dom.LabeledStatement;
 import org.eclipse.wst.jsdt.core.dom.ListExpression;
-import org.eclipse.wst.jsdt.core.dom.Name;
 import org.eclipse.wst.jsdt.core.dom.ObjectLiteral;
 import org.eclipse.wst.jsdt.core.dom.ObjectLiteralField;
 import org.eclipse.wst.jsdt.core.dom.ObjectLiteralField.FieldKind;
@@ -212,17 +212,35 @@ public class DOMASTConverter extends EStreeVisitor{
 			parent = nodes.peek();
 		}
 		
-		if(current instanceof Expression ){
-			assignExpressionToParent((Expression)current, parent, key);
-		}else
-		if(current instanceof Statement){
-			assignStatementToParent((Statement)current,parent, key);
-		}else
-		if(current instanceof VariableDeclaration){
-			assignVariableDeclarationToParent((VariableDeclaration)current, parent);
-		}else
-		if(current.getNodeType() == CATCH_CLAUSE){
-			assignCatchToTry(current, parent);
+		try{
+			if(current instanceof Expression ){
+				assignExpressionToParent((Expression)current, parent, key);
+			}else
+			if(current instanceof Statement){
+				assignStatementToParent((Statement)current,parent, key);
+			}else
+			if(current instanceof VariableDeclaration){
+				assignVariableDeclarationToParent((VariableDeclaration)current, parent);
+			}else
+			if(current.getNodeType() == CATCH_CLAUSE){
+				assignCatchToTry(current, parent);
+			}
+		}catch(Exception e){
+			StringBuilder sb = new StringBuilder(e.toString());
+			sb.append(" assigning "); //$NON-NLS-1$
+			sb.append(current.getClass().getSimpleName());
+			sb.append("["); //$NON-NLS-1$
+			sb.append(current);
+			sb.append("]"); //$NON-NLS-1$
+			if( parent!=null ){
+				sb.append(" to "); //$NON-NLS-1$
+				sb.append(parent.getClass().getSimpleName());
+				sb.append("["); //$NON-NLS-1$
+				sb.append(parent);
+				sb.append("]"); //$NON-NLS-1$
+			}
+			System.out.println(sb);
+			throw e;
 		}
 		//clean-up the switch statement
 		if(current == processingSwitchStatement){
@@ -396,7 +414,9 @@ public class DOMASTConverter extends EStreeVisitor{
 				FunctionExpression fe = (FunctionExpression)parent;
 				//assign to contained FunctionDeclaration
 				if("params".equals(key)){
-					fe.getMethod().parameters().add(expression);
+					SingleVariableDeclaration svd = ast.newSingleVariableDeclaration();
+					svd.setName((SimpleName) expression);
+					fe.getMethod().parameters().add(svd);
 				}else{
 					fe.getMethod().setName((SimpleName) expression);
 				}
@@ -404,7 +424,9 @@ public class DOMASTConverter extends EStreeVisitor{
 			case FUNCTION_DECLARATION:
 				FunctionDeclaration fdec = (FunctionDeclaration)parent;
 				if("params".equals(key)){
-					fdec.parameters().add(expression);
+					SingleVariableDeclaration svd  = ast.newSingleVariableDeclaration();
+					svd.setName((SimpleName) expression);
+					fdec.parameters().add(svd);
 				}
 				break;
 			case POSTFIX_EXPRESSION:
@@ -461,7 +483,7 @@ public class DOMASTConverter extends EStreeVisitor{
 			case CLASS_INSTANCE_CREATION:
 				ClassInstanceCreation ci = (ClassInstanceCreation)parent;
 				if(key != null && key.equals("callee")){
-					ci.setName((Name) expression);
+					ci.setMember(expression);
 				}else
 				{
 					ci.arguments().add(expression);
@@ -470,7 +492,9 @@ public class DOMASTConverter extends EStreeVisitor{
 			case ARROW_FUNCTION_EXPRESSION:
 				ArrowFunctionExpression af = (ArrowFunctionExpression)parent;
 				if(key!= null && key.equals("params")){
-					af.parameters().add(expression);
+					SingleVariableDeclaration svd = ast.newSingleVariableDeclaration();
+					svd.setName((SimpleName) expression);
+					af.parameters().add(svd);
 				}else{
 					af.setExpression(expression);
 				}
@@ -555,7 +579,7 @@ public class DOMASTConverter extends EStreeVisitor{
 				}
 				break;
 			default :
-				throw new UnimplementedException("Assigning "+expression + " to "+parent+ " is not handled");	
+				throw new UnimplementedException("Assigning "+expression + " to "+parent+ " is not handled");//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
 	}
 
@@ -577,12 +601,17 @@ public class DOMASTConverter extends EStreeVisitor{
 		if(value instanceof String){
 			literal = ast.newStringLiteral(raw);
 		}
+		
+		if(object.hasMember("regex")){
+			literal = ast.newRegularExpressionLiteral(raw);
+		}
+		
 		if(value == null ){
 			literal = ast.newNullLiteral();
 		}
 		
 		if(literal == null ){
-			throw new UnimplementedException("Failed to translate Literal " + value);
+			throw new UnimplementedException("Failed to translate Literal " + value); //$NON-NLS-1$
 		}
 		else{
 			nodes.push(literal);
@@ -624,7 +653,14 @@ public class DOMASTConverter extends EStreeVisitor{
 	
 	private VisitOptions convertIdentifier(final ScriptObjectMirror object) {
 		final String s = (String)object.getMember("name");
-		final SimpleName name = ast.newSimpleName(s);
+		SimpleName name = null;
+		try{
+			name = ast.newSimpleName(s);
+		}catch(IllegalArgumentException e){
+			// SimpleName does not allow keywords 
+			// try propertyName.
+			name = ast.newPropertyName(s);
+		}
 		nodes.push(name);
 		return VisitOptions.CONTINUE;
 	}

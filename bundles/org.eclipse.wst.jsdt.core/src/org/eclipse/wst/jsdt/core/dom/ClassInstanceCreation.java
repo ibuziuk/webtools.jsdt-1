@@ -102,7 +102,7 @@ public class ClassInstanceCreation extends Expression {
 		new ChildPropertyDescriptor(ClassInstanceCreation.class, "anonymousClassDeclaration", AnonymousClassDeclaration.class, OPTIONAL, CYCLE_RISK); //$NON-NLS-1$
 
 	public static final ChildPropertyDescriptor MEMBER_PROPERTY =
-		new ChildPropertyDescriptor(ClassInstanceCreation.class, "member", AnonymousClassDeclaration.class, MANDATORY, CYCLE_RISK); //$NON-NLS-1$
+		new ChildPropertyDescriptor(ClassInstanceCreation.class, "member", Expression.class, MANDATORY, CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * A list of property descriptors (element type:

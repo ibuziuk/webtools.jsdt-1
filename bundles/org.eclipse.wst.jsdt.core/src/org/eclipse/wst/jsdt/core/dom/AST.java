@@ -900,6 +900,23 @@ public final class AST {
 	}
 
 	/**
+	 * Creates and returns a new unparented property name node for the given
+	 * identifier. The identifier should be a legal JavaScript identifier,
+	 * 
+	 * @param identifier the identifier
+	 * @return a new unparented propertyName node
+	 * @exception IllegalArgumentException if the identifier is invalid
+	 */
+	public SimpleName newPropertyName(String identifier) {
+		if(identifier == null ){
+			throw new IllegalArgumentException();
+		}
+		PropertyName result = new PropertyName(this);
+		result.setIdentifier(identifier);
+		return result;
+	}
+
+	/**
 	 * Creates and returns a new unparented qualified name node for the given
 	 * qualifier and simple name child node.
 	 *
@@ -2558,6 +2575,7 @@ public final class AST {
 	void setFlag(int newValue) {
 		this.bits |= newValue;
 	}
+
 
 
 

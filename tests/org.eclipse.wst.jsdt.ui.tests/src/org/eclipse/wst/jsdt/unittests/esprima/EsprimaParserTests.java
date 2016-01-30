@@ -10,8 +10,18 @@
  *******************************************************************************/
 package org.eclipse.wst.jsdt.unittests.esprima;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import org.eclipse.wst.jsdt.core.dom.ASTNode;
@@ -19,11 +29,11 @@ import org.eclipse.wst.jsdt.core.dom.ArrayAccess;
 import org.eclipse.wst.jsdt.core.dom.ArrayInitializer;
 import org.eclipse.wst.jsdt.core.dom.ArrowFunctionExpression;
 import org.eclipse.wst.jsdt.core.dom.Assignment;
-import org.eclipse.wst.jsdt.core.dom.ClassInstanceCreation;
 import org.eclipse.wst.jsdt.core.dom.Assignment.Operator;
 import org.eclipse.wst.jsdt.core.dom.Block;
 import org.eclipse.wst.jsdt.core.dom.BreakStatement;
 import org.eclipse.wst.jsdt.core.dom.CatchClause;
+import org.eclipse.wst.jsdt.core.dom.ClassInstanceCreation;
 import org.eclipse.wst.jsdt.core.dom.ConditionalExpression;
 import org.eclipse.wst.jsdt.core.dom.ContinueStatement;
 import org.eclipse.wst.jsdt.core.dom.DebuggerStatement;
@@ -40,7 +50,6 @@ import org.eclipse.wst.jsdt.core.dom.FunctionInvocation;
 import org.eclipse.wst.jsdt.core.dom.IfStatement;
 import org.eclipse.wst.jsdt.core.dom.InfixExpression;
 import org.eclipse.wst.jsdt.core.dom.JavaScriptUnit;
-import org.eclipse.wst.jsdt.core.dom.VariableKind;
 import org.eclipse.wst.jsdt.core.dom.LabeledStatement;
 import org.eclipse.wst.jsdt.core.dom.ListExpression;
 import org.eclipse.wst.jsdt.core.dom.NumberLiteral;
@@ -48,6 +57,7 @@ import org.eclipse.wst.jsdt.core.dom.ObjectLiteral;
 import org.eclipse.wst.jsdt.core.dom.ObjectLiteralField;
 import org.eclipse.wst.jsdt.core.dom.PostfixExpression;
 import org.eclipse.wst.jsdt.core.dom.PrefixExpression;
+import org.eclipse.wst.jsdt.core.dom.RegularExpressionLiteral;
 import org.eclipse.wst.jsdt.core.dom.ReturnStatement;
 import org.eclipse.wst.jsdt.core.dom.SimpleName;
 import org.eclipse.wst.jsdt.core.dom.SwitchCase;
@@ -57,6 +67,7 @@ import org.eclipse.wst.jsdt.core.dom.ThrowStatement;
 import org.eclipse.wst.jsdt.core.dom.TryStatement;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.wst.jsdt.core.dom.VariableKind;
 import org.eclipse.wst.jsdt.core.dom.WhileStatement;
 import org.eclipse.wst.jsdt.core.dom.WithStatement;
 import org.eclipse.wst.jsdt.internal.esprima.EsprimaParser;
@@ -787,6 +798,85 @@ public class EsprimaParserTests {
 			}
 		}
 		fail();
+	}
+
+	@Test
+	public void testFunctionExpression_andParameter(){
+		JavaScriptUnit unit = EsprimaParser.newParser().parse("(function(y){});");
+		assertNotNull(unit);
+		List<ASTNode> statements = unit.statements();
+		for (ASTNode astNode : statements) {
+			if(astNode.getNodeType() == ASTNode.EXPRESSION_STATEMENT){
+				ExpressionStatement es = (ExpressionStatement)astNode;
+				assertTrue(es.getExpression() instanceof FunctionExpression);
+				FunctionExpression func = (FunctionExpression)es.getExpression();
+				assertFalse(func.getMethod().parameters().isEmpty());
+				assertEquals(1, func.getMethod().parameters().size());
+				
+				return;
+			}
+		}
+		fail();
+	}
+	@Test
+	public void testRegularExpression(){
+		JavaScriptUnit unit = EsprimaParser.newParser().parse("/.{0}/;");
+		assertNotNull(unit);
+		List<ASTNode> statements = unit.statements();
+		for (ASTNode astNode : statements) {
+			if(astNode.getNodeType() == ASTNode.EXPRESSION_STATEMENT){
+				ExpressionStatement es = (ExpressionStatement)astNode;
+				assertTrue(es.getExpression() instanceof RegularExpressionLiteral);
+				RegularExpressionLiteral rel = (RegularExpressionLiteral)es.getExpression();
+				assertEquals("/.{0}/", rel.getRegularExpression());
+				return;
+			}
+		}
+		fail();
+	}
+	
+	
+	// Everything.js tests.
+	
+	@Test
+	public void testEverythingJS_es5(){
+		testEverythingJs("es5.js");
+	}
+	
+	@Test
+	public void testEverythingJS_es2015_script(){
+		testEverythingJs("es2015-script.js");
+	}
+	
+	private void testEverythingJs(String file){
+		InputStream in = this.getClass().getResourceAsStream(file);
+		JavaScriptUnit unit = EsprimaParser.newParser().parse(readFile(in));
+		assertNotNull(unit);
+		assertFalse(unit.statements().isEmpty());
+	}
+	
+	private String readFile(InputStream input){
+		BufferedReader br = null;
+		StringBuilder sb = new StringBuilder();
+		String line;
+		try {
+			br = new BufferedReader(new InputStreamReader(input));
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
+				sb.append("\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return sb.toString();
 	}
 	
 }

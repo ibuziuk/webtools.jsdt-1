@@ -658,6 +658,8 @@ public abstract class ASTNode {
 	public static final int ARROW_FUNCTION_EXPRESSION = 94;
 	public static final int DEBUGGER_STATEMENT = 95;
 	public static final int FOR_OF_STATEMENT = 96;
+	public static final int PROPERTY_NAME = 97;
+	
 	
 
 
@@ -841,6 +843,8 @@ public abstract class ASTNode {
 				return ArrowFunctionExpression.class;
 			case DEBUGGER_STATEMENT:
 				return DebuggerStatement.class;
+			case PROPERTY_NAME:
+				return PropertyName.class;
 		}
 		throw new IllegalArgumentException();
 	}

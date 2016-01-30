@@ -1760,17 +1760,6 @@ public int getNextToken() throws InvalidInputException {
 							}
 							break;
 						}
-
-						if (checkIfDivide(previousTokenNonWS)){
-							if (getNextChar('='))
-							{
-								currentToken=currentNonWhitespaceToken=TokenNameDIVIDE_EQUAL;
-								return currentToken;
-							}
-							currentToken=currentNonWhitespaceToken=TokenNameDIVIDE;
-							return currentToken;
-						}
-
 						// check if regular expression
 						if (checkIfRegExp()) {
 							currentToken =currentNonWhitespaceToken= TokenNameRegExLiteral;

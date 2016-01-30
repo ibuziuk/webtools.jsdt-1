@@ -156,6 +156,10 @@ public class InfixExpression extends Expression {
 					AND,
 					CONDITIONAL_OR,
 					CONDITIONAL_AND,
+					INSTANCEOF,
+					IN,
+					EQUAL_EQUAL_EQUAL,
+					NOT_EQUAL_EQUAL
 				};
 			for (int i = 0; i < ops.length; i++) {
 				CODES.put(ops[i].toString(), ops[i]);
