@@ -143,7 +143,7 @@ public class ArrowFunctionExpression extends Expression {
 		ArrowFunctionExpression result = new ArrowFunctionExpression(target);
 		result.setSourceRange(this.getStartPosition(), this.getLength());
 		if(expression != null ){
-			result.setExpression(getExpression());
+			result.setExpression((Expression) getExpression().clone(target));
 		}
 		if(body != null ){
 			result.setBody((Block) ASTNode.copySubtree(target,getBody()));

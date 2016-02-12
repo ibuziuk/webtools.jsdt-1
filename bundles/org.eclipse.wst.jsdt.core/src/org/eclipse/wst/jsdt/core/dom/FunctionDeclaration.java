@@ -98,10 +98,17 @@ public class FunctionDeclaration extends BodyDeclaration {
 
 	/**
 	 * The "name" structural property of this node type.
-	 *  
+	 * @deprecated 
 	 */
 	public static final ChildPropertyDescriptor NAME_PROPERTY =
 		new ChildPropertyDescriptor(FunctionDeclaration.class, "name", SimpleName.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
+
+	/**
+	 * The "methodName" structural property of this node type.
+	 *  
+	 */
+	public static final ChildPropertyDescriptor METHOD_NAME_PROPERTY =
+				new ChildPropertyDescriptor(FunctionDeclaration.class, "methodName", Expression.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The "returnType" structural property of this node type (JLS2 API only).
@@ -168,13 +175,14 @@ public class FunctionDeclaration extends BodyDeclaration {
 	private static final List PROPERTY_DESCRIPTORS_3_0;
 
 	static {
-		List propertyList = new ArrayList(11);
+		List propertyList = new ArrayList(12);
 		createPropertyList(FunctionDeclaration.class, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
 		addProperty(MODIFIERS_PROPERTY, propertyList);
 		addProperty(CONSTRUCTOR_PROPERTY, propertyList);
 		addProperty(RETURN_TYPE_PROPERTY, propertyList);
 		addProperty(NAME_PROPERTY, propertyList);
+		addProperty(METHOD_NAME_PROPERTY, propertyList);
 		addProperty(PARAMETERS_PROPERTY, propertyList);
 		addProperty(EXTRA_DIMENSIONS_PROPERTY, propertyList);
 		addProperty(THROWN_EXCEPTIONS_PROPERTY, propertyList);
@@ -182,13 +190,14 @@ public class FunctionDeclaration extends BodyDeclaration {
 		addProperty(GENERATOR_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
 
-		propertyList = new ArrayList(12);
+		propertyList = new ArrayList(13);
 		createPropertyList(FunctionDeclaration.class, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
 		addProperty(MODIFIERS2_PROPERTY, propertyList);
 		addProperty(CONSTRUCTOR_PROPERTY, propertyList);
 		addProperty(RETURN_TYPE2_PROPERTY, propertyList);
 		addProperty(NAME_PROPERTY, propertyList);
+		addProperty(METHOD_NAME_PROPERTY, propertyList);
 		addProperty(PARAMETERS_PROPERTY, propertyList);
 		addProperty(EXTRA_DIMENSIONS_PROPERTY, propertyList);
 		addProperty(THROWN_EXCEPTIONS_PROPERTY, propertyList);
@@ -224,7 +233,8 @@ public class FunctionDeclaration extends BodyDeclaration {
 	 * The method name; lazily initialized; defaults to an unspecified,
 	 * legal JavaScript identifier.
 	 */
-	private SimpleName methodName = null;
+	private Expression methodName = null;
+	
 
 	/**
 	 * The parameter declarations
@@ -370,6 +380,14 @@ public class FunctionDeclaration extends BodyDeclaration {
 				return null;
 			}
 		}
+		if (property == METHOD_NAME_PROPERTY) {
+			if (get) {
+				return getMethodName();
+			} else {
+				setMethodName((Expression) child);
+				return null;
+			}
+		}
 		if (property == RETURN_TYPE_PROPERTY) {
 			if (get) {
 				return getReturnType();
@@ -465,9 +483,9 @@ public class FunctionDeclaration extends BodyDeclaration {
 		result.setGenerator(isGenerator());
 		result.setExtraDimensions(getExtraDimensions());
 		
-		SimpleName name = getName();
+		Expression name = getMethodName();
 		if(name != null){
-			result.setName((SimpleName) name.clone(target));
+			result.setMethodName((Expression)name.clone(target));
 		}
 		
 		result.parameters().addAll(
@@ -502,7 +520,7 @@ public class FunctionDeclaration extends BodyDeclaration {
 				acceptChild(visitor, getReturnType2());
 			}
 			// n.b. visit return type even for constructors
-			acceptChild(visitor, getName());
+			acceptChild(visitor, getMethodName());
 			acceptChildren(visitor, this.parameters);
 			acceptChildren(visitor, this.thrownExceptions);
 			acceptChild(visitor, getBody());
@@ -548,9 +566,10 @@ public class FunctionDeclaration extends BodyDeclaration {
 	 * of the class.
 	 *
 	 * @return the method name node
+	 * @deprecated use {@link #getMethodName()}
 	 */
 	public SimpleName getName() {
-		return this.methodName;
+		return (SimpleName) this.methodName;
 	}
 
 	/**
@@ -558,18 +577,32 @@ public class FunctionDeclaration extends BodyDeclaration {
 	 * given name. For a constructor declaration, this should be the same as
 	 * the name of the class.
 	 *
-	 * @param methodName the new method name
+	 * @param simpleName the new method name
 	 * @exception IllegalArgumentException if:
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
 	 * </ul>
+	 * @deprecated use {@link #setMethodName(Expression)}
+	 * 
 	 */
 	public void setName(SimpleName methodName) {
 		ASTNode oldChild = this.methodName;
 		preReplaceChild(oldChild, methodName, NAME_PROPERTY);
 		this.methodName = methodName;
 		postReplaceChild(oldChild, methodName, NAME_PROPERTY);
+	}
+
+	public Expression getMethodName() {
+		return methodName;
+	}
+
+	public void setMethodName(Expression methodName) {
+		ASTNode oldChild = this.methodName;
+		preReplaceChild(oldChild, methodName, METHOD_NAME_PROPERTY);
+		this.methodName = methodName;
+		postReplaceChild(oldChild, methodName, METHOD_NAME_PROPERTY);
+		this.methodName = methodName;
 	}
 
 	/**
@@ -884,7 +917,7 @@ public class FunctionDeclaration extends BodyDeclaration {
 			memSize()
 			+ (this.optionalDocComment == null ? 0 : getJavadoc().treeSize())
 			+ (this.modifiers == null ? 0 : this.modifiers.listSize())
-			+ (this.methodName == null ? 0 : getName().treeSize())
+			+ (this.methodName == null ? 0 : getMethodName().treeSize())
 			+ (this.returnType == null ? 0 : this.returnType.treeSize())
 			+ this.parameters.listSize()
 			+ this.thrownExceptions.listSize()

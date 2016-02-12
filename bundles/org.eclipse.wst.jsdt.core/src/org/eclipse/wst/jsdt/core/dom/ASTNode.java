@@ -659,18 +659,23 @@ public abstract class ASTNode {
 	public static final int DEBUGGER_STATEMENT = 95;
 	public static final int FOR_OF_STATEMENT = 96;
 	public static final int PROPERTY_NAME = 97;
-	
-	
-
-
-
-
+	public static final int ARRAY_NAME = 98;
+	public static final int OBJECT_NAME = 99;
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>Modifier</code>.
 	 * @see Modifier
 	 */
 	public static final int MODIFIER = 100;
+	
+	public static final int TEMPLATE_LITERAL = 101;
+	public static final int TEMPLATE_ELEMENT = 102;
+	public static final int ASSIGNMENT_NAME = 103;
+	public static final int REST_ELEMENT_NAME = 104;
+	public static final int SPREAD_ELEMENT = 105;
+	public static final int META_PROPERTY = 106;
+
+
 
 	/**
 	 * Returns the node class for the corresponding node type.

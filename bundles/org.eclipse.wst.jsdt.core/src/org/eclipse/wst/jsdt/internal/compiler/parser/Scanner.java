@@ -4448,7 +4448,7 @@ protected boolean checkIfRegExp() throws IndexOutOfBoundsException, InvalidInput
 
 		// Check for valid RegExp options
 		if (regExp) {
-			for (int count = 0; count <= 3; count++) {
+			for (int count = 0; count <= 5; count++) {
 				previousCharacter=this.currentCharacter;
 				previousPosition=this.currentPosition;
 				previousUnicodePtr=this.withoutUnicodePtr;
@@ -4458,9 +4458,11 @@ protected boolean checkIfRegExp() throws IndexOutOfBoundsException, InvalidInput
 						case 'i' :
 						case 'g' :
 						case 'm' :
+						case 'y' : //ES6 sticky
+						case 'u' : //ES6 unicode
 							break;
 						default :
-							if (count != 3) {
+							if (count != 5) {
 								throw new InvalidInputException(INVALID_REGEXP_OPT);
 							}
 						}

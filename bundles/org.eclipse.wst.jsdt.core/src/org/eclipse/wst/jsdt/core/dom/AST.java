@@ -915,6 +915,35 @@ public final class AST {
 		result.setIdentifier(identifier);
 		return result;
 	}
+	
+	/**
+	 * Creates and returns a new unparented array name node. 
+	 * 
+	 * @return a new Array name node
+	 */
+	public ArrayName newArrayName() {
+		ArrayName result = new ArrayName(this);
+		return result;
+	}
+	
+	/**
+	 * Creates and returns a new unparented object name node
+	 * @return a new Object name node
+	 */
+	public ObjectName newObjectName() {
+		ObjectName result = new ObjectName(this);
+		return result;
+	}
+	
+
+	/**
+	 * Creates and returns a new unparented assignment name (pattern) node
+	 * @return a new assignment name
+	 */
+	public AssignmentName newAssignmentName() {
+		AssignmentName result = new AssignmentName(this);
+		return result;
+	}
 
 	/**
 	 * Creates and returns a new unparented qualified name node for the given
@@ -2021,6 +2050,26 @@ public final class AST {
 		}
 		return newBooleanLiteral(Boolean.parseBoolean(value));
 	}
+	
+	/**
+	 * Creates and returns a new unparented template literal node.
+	 *
+	 * @return a new unparented template literal node
+	 */
+	public TemplateLiteral newTemplateLiteral() {
+		TemplateLiteral result = new TemplateLiteral(this);
+		return result;
+	}
+	
+	/**
+	 * Creates and returns a new unparented template element node.
+	 *
+	 * @return a new unparented template element node
+	 */
+	public TemplateElement newTemplateElement() {
+		TemplateElement result = new TemplateElement(this);
+		return result;
+	}
 
 	/**
 	 * Creates and returns a new unparented assignment expression node
@@ -2482,6 +2531,39 @@ public final class AST {
 		DebuggerStatement result = new DebuggerStatement(this);
 		return result;
 	}
+	
+	/**
+	 * Creates and returns a new unparented rest element node
+	 * owned by this AST.
+	 *
+	 * @return a new unparented rest element node
+	 */	
+	public RestElementName newRestElementName() {
+		RestElementName result = new RestElementName(this);
+		return result;
+	}
+	
+	/**
+	 * Creates and returns a new unparented spread element node
+	 * owned by this AST.
+	 *
+	 * @return a new unparented spread element node
+	 */	
+	public SpreadElement newSpreadElement() {
+		SpreadElement result = new SpreadElement(this);
+		return result;
+	}
+	
+	/**
+	 * Creates and returns a new unparented meta property node
+	 * owned by this AST.
+	 *
+	 * @return a new unparented  meta property node
+	 */	
+	public MetaProperty newMetaProperty() {
+		MetaProperty result = new MetaProperty(this);
+		return result;
+	}
 
 	/**
 	 * Enables the recording of changes to the given compilation
@@ -2575,11 +2657,5 @@ public final class AST {
 	void setFlag(int newValue) {
 		this.bits |= newValue;
 	}
-
-
-
-
-
-
 }
 

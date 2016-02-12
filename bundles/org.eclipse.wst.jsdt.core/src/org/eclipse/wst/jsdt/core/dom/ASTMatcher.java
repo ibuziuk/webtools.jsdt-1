@@ -2167,6 +2167,114 @@ public class ASTMatcher {
 		return (other instanceof DebuggerStatement);
 	}
 
+	/**
+	 * @param arrayName
+	 * @param other
+	 * @return
+	 */
+	public boolean match(ArrayName node, Object other) {
+		if(!(other instanceof ArrayName)){
+			return false;
+		}
+		ArrayName o = (ArrayName)other;
+		return safeSubtreeListMatch(node.elements(), o.elements());
+	}
 
+	/**
+	 * @param objectName
+	 * @param other
+	 * @return
+	 */
+	public boolean match(ObjectName node, Object other) {
+		if(!(other instanceof ObjectName)){
+			return false;
+		}
+		ObjectName o = (ObjectName) other;
+		return safeSubtreeListMatch(node.objectProperties(), o.objectProperties());
+	}
+
+	/**
+	 * @param templateElement
+	 * @param other
+	 * @return
+	 */
+	public boolean match(TemplateElement templateElement, Object other) {
+		if(!(other instanceof TemplateElement)){
+			return false;
+		}
+		TemplateElement o = (TemplateElement) other;
+		return o.getRawValue().equals(templateElement.getRawValue()) 
+					&& (o.isTail()==templateElement.isTail());
+	}
+
+	/**
+	 * @param templateLiteral
+	 * @param other
+	 * @return
+	 */
+	public boolean match(TemplateLiteral templateLiteral, Object other) {
+		if(!(other instanceof TemplateLiteral)){
+			return false;
+		}
+		TemplateLiteral o = (TemplateLiteral)other;
+		return safeSubtreeMatch(o.getTag(), templateLiteral.getTag())
+					&& safeSubtreeListMatch(o.elements(),templateLiteral.elements())
+					&& safeSubtreeListMatch(o.expressions(), templateLiteral.expressions());
+	}
+
+	/**
+	 * @param assignmentName
+	 * @param other
+	 * @return
+	 */
+	public boolean match(AssignmentName assignmentName, Object other) {
+		if(!(other instanceof AssignmentName)){
+			return false;
+		}
+		AssignmentName o = (AssignmentName) other;
+		return safeSubtreeMatch(o.getLeft(), assignmentName.getLeft())
+					&& safeSubtreeMatch(o.getRight(), assignmentName.getRight());
+	}
+
+	/**
+	 * @param restElementName
+	 * @param other
+	 * @return
+	 */
+	public boolean match(RestElementName restElementName, Object other) {
+		if(!(other instanceof RestElementName)){
+			return false;
+		}
+		RestElementName o = (RestElementName)other;
+		return safeSubtreeMatch(o.getArgument(), restElementName.getArgument());
+	}
+
+	/**
+	 * @param spreadElement
+	 * @param other
+	 * @return
+	 */
+	public boolean match(SpreadElement spreadElement, Object other) {
+		if(!(other instanceof SpreadElement)){
+			return false;
+		}
+		SpreadElement o = (SpreadElement)other;
+		return safeSubtreeMatch(o.getArgument(),spreadElement.getArgument());
+	}
+
+	/**
+	 * @param metaProperty
+	 * @param other
+	 * @return
+	 */
+	public boolean match(MetaProperty metaProperty, Object other) {
+		if(!(other instanceof MetaProperty)){
+			return false;
+		}
+		MetaProperty o = (MetaProperty) other;
+		return o.getMeta().equals(metaProperty.getMeta()) 
+					&& o.getPropertyName().equals(metaProperty.getPropertyName());
+			
+	}
 
 }

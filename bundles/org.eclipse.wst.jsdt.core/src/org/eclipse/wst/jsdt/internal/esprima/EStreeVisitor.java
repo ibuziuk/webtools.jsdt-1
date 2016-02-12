@@ -81,7 +81,11 @@ public class EStreeVisitor {
 				if (o instanceof ScriptObjectMirror) {
 					ScriptObjectMirror candidate = (ScriptObjectMirror) o;
 					if (candidate.isArray()) {
-						for (Map.Entry<String, Object> entry : candidate.entrySet()) {
+						// Create WorkElements for Array in reverse order 
+						// to keep the order coming out of stack
+						Object[] arrayElements = candidate.entrySet().toArray();
+						for (int j = arrayElements.length-1; j > -1; j--) {
+							Map.Entry<String, Object> entry = (java.util.Map.Entry<String, Object>) arrayElements[j];
 							Object result = entry.getValue();
 							if (result instanceof ScriptObjectMirror) {
 								workStack.push(new WorkElement((ScriptObjectMirror) result, keys[i] ,false));
