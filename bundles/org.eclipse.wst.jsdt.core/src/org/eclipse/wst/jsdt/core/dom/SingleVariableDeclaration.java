@@ -381,7 +381,7 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 				acceptChildren(visitor, this.modifiers);
 			}
 			acceptChild(visitor, getType());
-			acceptChild(visitor, getName());
+			acceptChild(visitor, getPattern());
 			acceptChild(visitor, getInitializer());
 		}
 		visitor.endVisit(this);

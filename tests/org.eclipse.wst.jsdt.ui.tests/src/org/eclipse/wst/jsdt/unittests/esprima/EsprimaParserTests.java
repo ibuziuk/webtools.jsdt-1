@@ -78,6 +78,7 @@ import org.eclipse.wst.jsdt.core.dom.TryStatement;
 import org.eclipse.wst.jsdt.core.dom.TypeDeclaration;
 import org.eclipse.wst.jsdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.wst.jsdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.wst.jsdt.core.dom.VariableKind;
 import org.eclipse.wst.jsdt.core.dom.WhileStatement;
@@ -96,19 +97,19 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void parseMultipleCalls(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("var a = 1;");
+		JavaScriptUnit unit = parse("var a = 1;");
 		assertNotNull(unit);
-		unit = EsprimaParser.newParser().parse("var a = true;");
+		unit = parse("var a = true;");
 		assertNotNull(unit);
-		unit = EsprimaParser.newParser().parse("var a = \'atest\';");
+		unit = parse("var a = \'atest\';");
 		assertNotNull(unit);
-		unit = EsprimaParser.newParser().parse("var a = null;");
+		unit = parse("var a = null;");
 		assertNotNull(unit);
 	}
 	
 	@Test
 	public void checkRange(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("var a = 1;");
+		JavaScriptUnit unit = parse("var a = 1;");
 		assertNotNull(unit);
 		assertEquals(0,unit.getStartPosition());
 		assertEquals(10, unit.getLength());
@@ -118,7 +119,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testVariableDeclaration_VAR(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("var a,b;");
+		JavaScriptUnit unit = parse("var a,b;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -134,7 +135,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testVariableDeclaration_LET(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("let a,b;");
+		JavaScriptUnit unit = parse("let a,b;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -150,7 +151,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testSimpleAssignment(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("a += 123;");
+		JavaScriptUnit unit = parse("a += 123;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -165,7 +166,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testThisExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("this;");
+		JavaScriptUnit unit = parse("this;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -179,7 +180,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testArrayExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("[1,2,3];");
+		JavaScriptUnit unit = parse("[1,2,3];");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -193,7 +194,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testObjectExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("o={ test:9 };");
+		JavaScriptUnit unit = parse("o={ test:9 };");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -215,7 +216,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testPosxFixExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("123++;");
+		JavaScriptUnit unit = parse("123++;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -230,7 +231,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testPreFixExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("delete a;");
+		JavaScriptUnit unit = parse("delete a;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -247,7 +248,7 @@ public class EsprimaParserTests {
 
 	@Test
 	public void testInfixExpression_0(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("d+7;");
+		JavaScriptUnit unit = parse("d+7;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -263,7 +264,7 @@ public class EsprimaParserTests {
 	}
 	@Test
 	public void testInfixExpression_1(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("d && a;");
+		JavaScriptUnit unit = parse("d && a;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -280,7 +281,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testArrayAccess(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("a[b];");
+		JavaScriptUnit unit = parse("a[b];");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -294,7 +295,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testFieldAccess(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("a.b;");
+		JavaScriptUnit unit = parse("a.b;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -308,7 +309,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testConditionalExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("a==1?b:c;");
+		JavaScriptUnit unit = parse("a==1?b:c;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -325,7 +326,7 @@ public class EsprimaParserTests {
 
 	@Test
 	public void testCallExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("f();");
+		JavaScriptUnit unit = parse("f();");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -340,7 +341,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testListExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("a,b.y,a[3];");
+		JavaScriptUnit unit = parse("a,b.y,a[3];");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -355,7 +356,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testClassInstanceCreation(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("new ab(c,d);");
+		JavaScriptUnit unit = parse("new ab(c,d);");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -370,7 +371,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testFunctionExpression_withIdentifierPattern(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("f = function(a){};");
+		JavaScriptUnit unit = parse("f = function(a){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -389,7 +390,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testGeneratorFunctionExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("f = function* (a){};");
+		JavaScriptUnit unit = parse("f = function* (a){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -409,7 +410,7 @@ public class EsprimaParserTests {
 
 	@Test
 	public void testFunctionExpression_withObjectPatternParameter(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("f= function({foo, bar: baz}){};");
+		JavaScriptUnit unit = parse("f= function({foo, bar: baz}){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -434,7 +435,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testArrowFunctionExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("foo = (bar) => 5+1;");
+		JavaScriptUnit unit = parse("foo = (bar) => 5+1;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -450,7 +451,7 @@ public class EsprimaParserTests {
 	}	
 	@Test
 	public void testBlockStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("{a=2;};");
+		JavaScriptUnit unit = parse("{a=2;};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -471,7 +472,7 @@ public class EsprimaParserTests {
 
 	@Test
 	public void testEmptyStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("{;};");
+		JavaScriptUnit unit = parse("{;};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -487,7 +488,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testDebuggerStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("{debugger;};");
+		JavaScriptUnit unit = parse("{debugger;};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -503,7 +504,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testWithStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("with(console){log(\"test\");};");
+		JavaScriptUnit unit = parse("with(console){log(\"test\");};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -519,7 +520,7 @@ public class EsprimaParserTests {
 
 	@Test
 	public void testReturnStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("f= function(){return 0;};");
+		JavaScriptUnit unit = parse("f= function(){return 0;};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -539,7 +540,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testLabeledStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("abc: a=7+1;");
+		JavaScriptUnit unit = parse("abc: a=7+1;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -555,7 +556,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testBreakStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("while(e){break;};");
+		JavaScriptUnit unit = parse("while(e){break;};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -575,7 +576,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testContinueStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("while(e){continue;};");
+		JavaScriptUnit unit = parse("while(e){continue;};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -595,7 +596,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testIfStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("if(a){ab;}else ac;");
+		JavaScriptUnit unit = parse("if(a){ab;}else ac;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -614,7 +615,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testSwitchStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("switch(a) {};");
+		JavaScriptUnit unit = parse("switch(a) {};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -631,7 +632,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testSwitchCaseStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("switch(a) {case a:b;};");
+		JavaScriptUnit unit = parse("switch(a) {case a:b;};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -650,7 +651,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testThrowStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("throw d;");
+		JavaScriptUnit unit = parse("throw d;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -667,7 +668,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testTryCatchFinallyStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("try{}catch(e){}finally{}");
+		JavaScriptUnit unit = parse("try{}catch(e){}finally{}");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -685,7 +686,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testWhileStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("while(e){};");
+		JavaScriptUnit unit = parse("while(e){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -703,7 +704,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testDoWhileStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("do{}while(e);");
+		JavaScriptUnit unit = parse("do{}while(e);");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -721,7 +722,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testForStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("for(let i=0;i<10;i++){};");
+		JavaScriptUnit unit = parse("for(let i=0;i<10;i++){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -742,7 +743,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testForInStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("for(let i in a){};");
+		JavaScriptUnit unit = parse("for(let i in a){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -763,7 +764,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testForInStatement_1(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("for(i in a){};");
+		JavaScriptUnit unit = parse("for(i in a){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -778,7 +779,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testForOfStatement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("for(let i of a){};");
+		JavaScriptUnit unit = parse("for(let i of a){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -799,7 +800,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testAnonymousFunction(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("f(function(){});");
+		JavaScriptUnit unit = parse("f(function(){});");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -818,7 +819,7 @@ public class EsprimaParserTests {
 
 	@Test
 	public void testFunctionExpression_andParameter(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("(function(y){});");
+		JavaScriptUnit unit = parse("(function(y){});");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -837,7 +838,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testRegularExpression(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("/.{0}/;");
+		JavaScriptUnit unit = parse("/.{0}/;");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -856,7 +857,7 @@ public class EsprimaParserTests {
 	@Test
 	public void testRegularExpressionWithES6flags(){
 		
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("/\\u{00000001d306}/u");
+		JavaScriptUnit unit = parse("/\\u{00000001d306}/u");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -871,7 +872,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testClassDeclaration(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("class MyClass extends YourClass{}");
+		JavaScriptUnit unit = parse("class MyClass extends YourClass{}");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -890,7 +891,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testMethodDefiniton(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("class MyClass extends YourClass{" +
+		JavaScriptUnit unit = parse("class MyClass extends YourClass{" +
 																"constructor(){};" +
 																"get test(){};" +
 																"static aStaticMethod(){" + 
@@ -914,7 +915,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testSuper(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("class MyClass extends YourClass{" +
+		JavaScriptUnit unit = parse("class MyClass extends YourClass{" +
 																"constructor(){super();};" +
 																"}");
 		assertNotNull(unit);
@@ -948,7 +949,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testRestElement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("function foo (bar, ...rest) {}");
+		JavaScriptUnit unit = parse("function foo (bar, ...rest) {}");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -969,7 +970,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testArrayPattern(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("f = function([foo, bar]){};");
+		JavaScriptUnit unit = parse("f = function([foo, bar]){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -994,7 +995,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testAssignmentPattern(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("function f([d = 0, ...e]){};");
+		JavaScriptUnit unit = parse("function f([d = 0, ...e]){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -1015,7 +1016,7 @@ public class EsprimaParserTests {
 	}
 	@Test
 	public void testObjectPattern(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("function f({ age, name }){};");
+		JavaScriptUnit unit = parse("function f({ age, name }){};");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -1037,7 +1038,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testTemplateLiteral(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("`this blog lives ${cheer} at ${host}`");
+		JavaScriptUnit unit = parse("`this blog lives ${cheer} at ${host}`");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -1063,7 +1064,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testTagTemplateLiteral(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("aTag `this blog lives ${cheer} at ${host}`");
+		JavaScriptUnit unit = parse("aTag `this blog lives ${cheer} at ${host}`");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		for (ASTNode astNode : statements) {
@@ -1093,7 +1094,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testSpreadElement(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("[...document.querySelectorAll('div')]");
+		JavaScriptUnit unit = parse("[...document.querySelectorAll('div')]");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		ExpressionStatement es = (ExpressionStatement)statements.get(0);
@@ -1108,7 +1109,7 @@ public class EsprimaParserTests {
 	
 	@Test
 	public void testMetaProperty(){
-		JavaScriptUnit unit = EsprimaParser.newParser().parse("function f(){new.target;}");
+		JavaScriptUnit unit = parse("function f(){new.target;}");
 		assertNotNull(unit);
 		List<ASTNode> statements = unit.statements();
 		FunctionDeclaration fd = (FunctionDeclaration)statements.get(0);
@@ -1118,6 +1119,37 @@ public class EsprimaParserTests {
 		assertEquals("new", mp.getMeta());
 		assertEquals("target", mp.getPropertyName());
 		assertEquals("new.target", mp.toString());
+	}
+	
+	@Test
+	public void testAbortingError(){
+		JavaScriptUnit unit = parse("if(true){a =;};");
+		assertNotNull(unit);	
+		assertEquals(1, unit.getMessages().length);
+	}
+	
+	@Test
+	public void testTolerantError(){
+		JavaScriptUnit unit = parse(" 234++\n   123++");
+		assertNotNull(unit);	
+		assertEquals(2, unit.getMessages().length);
+	}
+	
+	@Test
+	public void testObjectDeclare(){
+		JavaScriptUnit unit = parse("var app = {\n"
+									+"initialize: function() {\n"
+									+"this.bindEvents();\n}};");
+		assertFalse(unit.statements().isEmpty());
+		VariableDeclarationStatement vd = (VariableDeclarationStatement)unit.statements().get(0);
+		assertFalse(vd.fragments().isEmpty());
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment) vd.fragments().get(0);
+		assertEquals(ObjectLiteral.class, fragment.getInitializer().getClass());
+		ObjectLiteral objectLiteral = (ObjectLiteral) fragment.getInitializer();
+		assertFalse(objectLiteral.fields().isEmpty());
+		ObjectLiteralField field = (ObjectLiteralField) objectLiteral.fields().get(0);
+		assertEquals("initialize",((SimpleName)field.getFieldName()).getIdentifier());
+
 	}
 	
 	// #### Everything.js tests.
@@ -1136,10 +1168,15 @@ public class EsprimaParserTests {
 //	public void testEverythingJS_es2015_module(){
 //		testEverythingJs("es2015-module.js");
 //	}
+
+	
+	private JavaScriptUnit parse(String content){
+		return EsprimaParser.newParser().setSource(content).parse();
+	}
 	
 	private void testEverythingJs(String file){
 		InputStream in = this.getClass().getResourceAsStream(file);
-		JavaScriptUnit unit = EsprimaParser.newParser().parse(readFile(in));
+		JavaScriptUnit unit = EsprimaParser.newParser().setSource(readFile(in)).parse();
 		assertNotNull(unit);
 		assertFalse(unit.statements().isEmpty());
 	}

@@ -991,7 +991,7 @@ public class JavaScriptUnit extends ASTNode {
 	 *
 	 * @param problems the list of problems
 	 */
-	void setProblems(IProblem[] problems) {
+	public void setProblems(IProblem[] problems) {
 		if (problems == null) {
 			throw new IllegalArgumentException();
 		}

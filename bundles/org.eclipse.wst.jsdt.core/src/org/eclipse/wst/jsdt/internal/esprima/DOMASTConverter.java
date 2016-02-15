@@ -96,7 +96,7 @@ public class DOMASTConverter extends EStreeVisitor{
 
 	private final AST ast;
 	private Stack<ASTNode> nodes = new Stack<ASTNode>();
-	private JavaScriptUnit root;
+	private final JavaScriptUnit root;
 	// Because switch also hosts all the statements in the case
 	// statement we need to pointer to hold the currently processed switch
 	private SwitchStatement processingSwitchStatement;
@@ -104,8 +104,12 @@ public class DOMASTConverter extends EStreeVisitor{
 	/**
 	 * 
 	 */
-	public DOMASTConverter() {
-		this.ast = AST.newAST(AST.JLS3);
+	public DOMASTConverter(final JavaScriptUnit unit) {
+		if(unit == null ){
+			throw new IllegalArgumentException();
+		}
+		this.root = unit;
+		this.ast = unit.getAST();
 	}
 	
 	public JavaScriptUnit convert(ScriptObjectMirror jsobject){
@@ -752,7 +756,6 @@ public class DOMASTConverter extends EStreeVisitor{
 	}
 	 
 	private VisitOptions convertProgram(final ScriptObjectMirror object){
-		root = ast.newJavaScriptUnit();
 		nodes.push(root);	
 		return VisitOptions.CONTINUE;
 	}
