@@ -99,7 +99,7 @@ public class DOMASTConverter extends EStreeVisitor{
 	private final JavaScriptUnit root;
 	// Because switch also hosts all the statements in the case
 	// statement we need to pointer to hold the currently processed switch
-	private SwitchStatement processingSwitchStatement;
+	private Stack<SwitchStatement> processingSwitchStatements = new Stack<SwitchStatement>();
  	
 	/**
 	 * 
@@ -266,6 +266,11 @@ public class DOMASTConverter extends EStreeVisitor{
 		}
 		
 		try{
+			//clean-up the switch statement
+			if(current.getNodeType() == SWITCH_STATEMENT){
+				processingSwitchStatements.pop();
+			}
+			
 			if(current instanceof Expression ){
 				assignExpressionToParent((Expression)current, parent, key);
 			}else
@@ -298,10 +303,7 @@ public class DOMASTConverter extends EStreeVisitor{
 			System.out.println(sb);
 			throw e;
 		}
-		//clean-up the switch statement
-		if(current == processingSwitchStatement){
-			processingSwitchStatement = null;
-		}
+
 		return VisitOptions.CONTINUE;
 	}
 
@@ -369,7 +371,7 @@ public class DOMASTConverter extends EStreeVisitor{
 				break;
 			case SWITCH_CASE:
 				// all statements on the switchcase goes into switch.
-				processingSwitchStatement.statements().add(statement);
+				processingSwitchStatements.peek().statements().add(statement);
 				break;
 			case CATCH_CLAUSE:
 				CatchClause cc = (CatchClause)parent;
@@ -1006,7 +1008,7 @@ public class DOMASTConverter extends EStreeVisitor{
 	
 	private VisitOptions convertSwitchStatement(final ScriptObjectMirror object) {
 		SwitchStatement ss = ast.newSwitchStatement();
-		this.processingSwitchStatement = ss;
+		this.processingSwitchStatements.push(ss);
 		nodes.push(ss);
 		return VisitOptions.CONTINUE;
 	}
@@ -1014,11 +1016,11 @@ public class DOMASTConverter extends EStreeVisitor{
 	private VisitOptions convertSwitchCaseStatement(final ScriptObjectMirror object) {
 		SwitchCase sc = ast.newSwitchCase();
 		nodes.push(sc);
-		if(processingSwitchStatement == null ){
+		if(processingSwitchStatements.empty() ){
 			throw new IllegalStateException("Case statement without a switch");
 		}
 		//add the case to switch statement here so that the order is correct
-		processingSwitchStatement.statements().add(sc);
+		processingSwitchStatements.peek().statements().add(sc);
 		return VisitOptions.CONTINUE;
 	}
 

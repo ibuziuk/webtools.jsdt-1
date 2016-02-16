@@ -650,6 +650,23 @@ public class EsprimaParserTests {
 	}	
 	
 	@Test
+	public void testNestedSwitchCaseStatement(){
+		JavaScriptUnit unit = parse("switch(a) {case a: switch(b){case c: d;};};");
+		assertNotNull(unit);
+		List<ASTNode> statements = unit.statements();
+		for (ASTNode astNode : statements) {
+			if(astNode.getNodeType() == ASTNode.SWITCH_STATEMENT){
+				SwitchStatement ss = (SwitchStatement)astNode;
+				assertFalse(ss.statements().isEmpty());
+				assertTrue(ss.statements().get(0) instanceof SwitchCase);
+				assertEquals(SwitchStatement.class, ss.statements().get(1).getClass());
+				return;
+			}
+		}
+		fail();
+	}
+	
+	@Test
 	public void testThrowStatement(){
 		JavaScriptUnit unit = parse("throw d;");
 		assertNotNull(unit);

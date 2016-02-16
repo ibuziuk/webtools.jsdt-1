@@ -26,9 +26,9 @@ import org.eclipse.wst.jsdt.core.JavaScriptModelException;
 import org.eclipse.wst.jsdt.core.compiler.IProblem;
 import org.eclipse.wst.jsdt.core.dom.AST;
 import org.eclipse.wst.jsdt.core.dom.JavaScriptUnit;
-import org.eclipse.wst.jsdt.internal.compiler.batch.CompilationUnit;
 import org.eclipse.wst.jsdt.internal.compiler.problem.DefaultProblem;
 import org.eclipse.wst.jsdt.internal.compiler.problem.ProblemSeverities;
+import org.eclipse.wst.jsdt.internal.core.CompilationUnit;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.runtime.ECMAException;
