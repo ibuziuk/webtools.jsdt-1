@@ -1139,6 +1139,17 @@ public class EsprimaParserTests {
 	}
 	
 	@Test
+	public void testFunctionDeclaration(){
+		JavaScriptUnit unit = parse("function fName(){return;}");
+		assertNotNull(unit);
+		List<ASTNode> statements = unit.statements();
+		FunctionDeclaration fd = (FunctionDeclaration)statements.get(0);
+		assertNotNull(fd.getMethodName());
+		assertEquals(fd.getName(), fd.getMethodName());
+		assertEquals("fName", ((SimpleName)fd.getMethodName()).getIdentifier());
+	}
+	
+	@Test
 	public void testAbortingError(){
 		JavaScriptUnit unit = parse("if(true){a =;};");
 		assertNotNull(unit);	

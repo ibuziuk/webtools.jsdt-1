@@ -513,6 +513,9 @@ public class DOMASTConverter extends EStreeVisitor{
 				if("key".equals(key)){
 					fdec.setMethodName(expression);
 				}
+				if("id".equals(key)){
+					fdec.setMethodName(expression);
+				}
 				break;
 			case POSTFIX_EXPRESSION:
 				((PostfixExpression)parent).setOperand(expression);

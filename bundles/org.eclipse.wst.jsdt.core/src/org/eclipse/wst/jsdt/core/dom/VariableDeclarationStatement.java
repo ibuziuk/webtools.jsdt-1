@@ -214,7 +214,20 @@ public class VariableDeclarationStatement extends Statement {
 		// allow default implementation to flag the error
 		return super.internalGetSetIntProperty(property, get, value);
 	}
-
+/* (non-Javadoc)
+ * @see org.eclipse.wst.jsdt.core.dom.ASTNode#internalGetSetObjectProperty(org.eclipse.wst.jsdt.core.dom.SimplePropertyDescriptor, boolean, java.lang.Object)
+ */
+Object internalGetSetObjectProperty(SimplePropertyDescriptor property, boolean get, Object value) {
+	if (property == KIND_PROPERTY) {
+		if (get) {
+			return getKind();
+		} else {
+			setKind((VariableKind) value);
+			return null;
+		}
+	}
+	return super.internalGetSetObjectProperty(property, get, value);
+}
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */

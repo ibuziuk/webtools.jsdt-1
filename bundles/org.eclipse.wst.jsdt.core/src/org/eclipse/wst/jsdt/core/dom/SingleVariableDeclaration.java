@@ -474,6 +474,9 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 * Method declared on VariableDeclaration.
 	 */
 	public SimpleName getName() {
+		if(this.getPattern().getNodeType() != SIMPLE_NAME){
+			return null;
+		}
 		return (SimpleName) this.getPattern();
 	}
 
