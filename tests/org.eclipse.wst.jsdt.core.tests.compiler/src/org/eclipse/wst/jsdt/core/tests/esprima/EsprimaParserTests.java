@@ -90,6 +90,8 @@ import org.eclipse.wst.jsdt.core.dom.WithStatement;
 import org.eclipse.wst.jsdt.core.dom.YieldExpression;
 import org.eclipse.wst.jsdt.internal.esprima.EsprimaParser;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 @SuppressWarnings("nls")
 public class EsprimaParserTests {

@@ -131,7 +131,7 @@ public class CompilationUnitDeclaration
 	 */
 	public void analyseCode() {
 
-		if (ignoreFurtherInvestigation )
+		if (ignoreFurtherInvestigation || this.scope == null)
 			return;
 		try {
 			if (types != null) {
