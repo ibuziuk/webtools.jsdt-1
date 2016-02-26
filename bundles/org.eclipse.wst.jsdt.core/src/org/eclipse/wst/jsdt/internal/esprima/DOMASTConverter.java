@@ -34,6 +34,7 @@ import org.eclipse.wst.jsdt.core.dom.ContinueStatement;
 import org.eclipse.wst.jsdt.core.dom.DebuggerStatement;
 import org.eclipse.wst.jsdt.core.dom.DoStatement;
 import org.eclipse.wst.jsdt.core.dom.EmptyStatement;
+import org.eclipse.wst.jsdt.core.dom.ExportDeclaration;
 import org.eclipse.wst.jsdt.core.dom.Expression;
 import org.eclipse.wst.jsdt.core.dom.ExpressionStatement;
 import org.eclipse.wst.jsdt.core.dom.FieldAccess;
@@ -44,6 +45,7 @@ import org.eclipse.wst.jsdt.core.dom.FunctionDeclaration;
 import org.eclipse.wst.jsdt.core.dom.FunctionExpression;
 import org.eclipse.wst.jsdt.core.dom.FunctionInvocation;
 import org.eclipse.wst.jsdt.core.dom.IfStatement;
+import org.eclipse.wst.jsdt.core.dom.ImportDeclaration;
 import org.eclipse.wst.jsdt.core.dom.InfixExpression;
 import org.eclipse.wst.jsdt.core.dom.JavaScriptUnit;
 import org.eclipse.wst.jsdt.core.dom.LabeledStatement;
@@ -51,6 +53,7 @@ import org.eclipse.wst.jsdt.core.dom.ListExpression;
 import org.eclipse.wst.jsdt.core.dom.MetaProperty;
 import org.eclipse.wst.jsdt.core.dom.Modifier;
 import org.eclipse.wst.jsdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.wst.jsdt.core.dom.ModuleSpecifier;
 import org.eclipse.wst.jsdt.core.dom.Name;
 import org.eclipse.wst.jsdt.core.dom.ObjectLiteral;
 import org.eclipse.wst.jsdt.core.dom.ObjectLiteralField;
@@ -65,6 +68,7 @@ import org.eclipse.wst.jsdt.core.dom.SimpleName;
 import org.eclipse.wst.jsdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.wst.jsdt.core.dom.SpreadElement;
 import org.eclipse.wst.jsdt.core.dom.Statement;
+import org.eclipse.wst.jsdt.core.dom.StringLiteral;
 import org.eclipse.wst.jsdt.core.dom.SuperMethodInvocation;
 import org.eclipse.wst.jsdt.core.dom.SwitchCase;
 import org.eclipse.wst.jsdt.core.dom.SwitchStatement;
@@ -239,10 +243,27 @@ public class DOMASTConverter extends EStreeVisitor{
 				return convertSpreadElement(object);
 			case MetaProperty:
 				return convertMetaProperty(object);
+			case ImportDeclaration:
+				return convertImportDeclaration(object);
+			case ImportSpecifier:
+				return convertImportSpecifer(object, false, false);
+			case ImportDefaultSpecifier:
+				return convertImportSpecifer(object, true, false);
+			case ImportNamespaceSpecifier:
+				return convertImportSpecifer(object, true, false);
+			case ExportNamedDeclaration:
+				return convertExportDeclaration(object, false, false);
+			case ExportSpecifier:
+				return convertExportSpecifier(object);
+			case ExportAllDeclaration: 
+				return convertExportDeclaration(object, false, true);
+			case ExportDefaultDeclaration:
+				return convertExportDeclaration(object, true, false);
 			default:
 				throw new UnimplementedException(nodeType.getTypeString() + " conversion is not implemented"); //$NON-NLS-1$
 		}
 	}
+
 
 
 
@@ -270,7 +291,9 @@ public class DOMASTConverter extends EStreeVisitor{
 			if(current.getNodeType() == SWITCH_STATEMENT){
 				processingSwitchStatements.pop();
 			}
-			
+			if(current.getNodeType() == MODULE_SPECIFIER){
+				assignModuleSpecifier((ModuleSpecifier)current, parent);
+			}else
 			if(current instanceof Expression ){
 				assignExpressionToParent((Expression)current, parent, key);
 			}else
@@ -285,7 +308,14 @@ public class DOMASTConverter extends EStreeVisitor{
 			}else
 			if(current.getNodeType() == TEMPLATE_ELEMENT){
 				assingTemplateElement(current, parent);
+			}else 
+			if(current.getNodeType() == IMPORT_DECLARATION){
+				root.imports().add(current);
+			}else
+			if(current.getNodeType() == EXPORT_DECLARATION){
+				root.exports().add(current);
 			}
+			
 		}catch(Exception e){
 			StringBuilder sb = new StringBuilder(e.toString());
 			sb.append(" assigning "); //$NON-NLS-1$
@@ -305,6 +335,23 @@ public class DOMASTConverter extends EStreeVisitor{
 		}
 
 		return VisitOptions.CONTINUE;
+	}
+
+	private void assignModuleSpecifier(ModuleSpecifier module, ASTNode parent) {
+		switch(parent.getNodeType()){
+			case IMPORT_DECLARATION:
+				ImportDeclaration importDec = (ImportDeclaration) parent;
+				importDec.specifiers().add(module);
+				break;
+			case EXPORT_DECLARATION:
+				ExportDeclaration exportDec = (ExportDeclaration)parent;
+				exportDec.specifiers().add(module);
+				break;
+			default:
+				throw new UnimplementedException("Assigning "+ module + " to "+parent+ " is not handled");	
+
+		}
+		
 	}
 
 	private void assingTemplateElement(ASTNode current, ASTNode parent) {
@@ -419,6 +466,12 @@ public class DOMASTConverter extends EStreeVisitor{
 				break;
 			case TYPE_DECLARATION_STATEMENT:
 				//TypeDeclaration is already assigned during convert.
+				break;
+			case EXPORT_DECLARATION:
+				ExportDeclaration edec = (ExportDeclaration) parent;
+				if("declaration".equals(key)){
+					edec.setDeclaration(statement);
+				}
 				break;
 			default:
 				throw new UnimplementedException("Assigning "+statement + " to "+parent+ " is not handled");	
@@ -721,6 +774,25 @@ public class DOMASTConverter extends EStreeVisitor{
 					sel.setArgument(expression);
 				}
 				break;
+			case IMPORT_DECLARATION: 
+				ImportDeclaration idec = (ImportDeclaration) parent;
+				idec.setSource((StringLiteral)expression);
+				break;
+			case MODULE_SPECIFIER:
+				ModuleSpecifier specifier = (ModuleSpecifier) parent;
+				if("local".equals(key)){
+					specifier.setLocal((SimpleName) expression);
+				}
+				if("imported".equals(key)){
+					specifier.setDiscoverableName((SimpleName) expression);
+				}
+				break;
+			case EXPORT_DECLARATION:
+				ExportDeclaration edec = (ExportDeclaration) parent;
+				if("source".equals(key)){
+					edec.setSource((StringLiteral) expression);
+				}
+				break;
 			default :
 				throw new UnimplementedException("Assigning "+expression + " to "+parent+ " is not handled");//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
@@ -773,7 +845,8 @@ public class DOMASTConverter extends EStreeVisitor{
 		}else if(kind.equals("const")){
 			variableKind = VariableKind.CONST;
 		}
-		if(nodes.peek().getNodeType() == FOR_STATEMENT){// For statements use expression
+		int parentType = nodes.peek().getNodeType();
+		if(parentType == FOR_STATEMENT ){// For statements use expression
 			final VariableDeclarationExpression e = ast.newVariableDeclarationExpression();	
 			e.setKind(variableKind);
 			nodes.push(e);
@@ -1159,10 +1232,6 @@ public class DOMASTConverter extends EStreeVisitor{
 		return VisitOptions.CONTINUE;
 	}
 
-	/**
-	 * @param object
-	 * @return
-	 */
 	private VisitOptions convertMetaProperty(final ScriptObjectMirror object) {
 		MetaProperty mp = ast.newMetaProperty();
 		String meta = (String) object.getMember("meta");
@@ -1172,4 +1241,33 @@ public class DOMASTConverter extends EStreeVisitor{
 		nodes.push(mp);
 		return VisitOptions.CONTINUE;
 	}
+
+	private VisitOptions convertImportDeclaration(final ScriptObjectMirror object) {
+		ImportDeclaration importDecl = ast.newImportDeclaration();
+		nodes.push(importDecl);
+		return VisitOptions.CONTINUE;
+	}
+	
+	
+	private VisitOptions convertImportSpecifer(ScriptObjectMirror object, boolean isDefault, boolean isNamespace) {
+		ModuleSpecifier specifier = ast.newModuleSpecifier();
+		specifier.setDefault(isDefault);
+		specifier.setNamespace(isNamespace);
+		nodes.push(specifier);
+		return VisitOptions.CONTINUE;
+	}
+	
+	private VisitOptions convertExportSpecifier(ScriptObjectMirror object) {
+		ModuleSpecifier specifier = ast.newModuleSpecifier();
+		nodes.push(specifier);
+		return VisitOptions.CONTINUE;
+	}
+	
+	private VisitOptions convertExportDeclaration(ScriptObjectMirror object, boolean isDefault, boolean isAll) {
+		ExportDeclaration declaration = ast.newExportDeclaration();
+		declaration.setDefault(isDefault);
+		declaration.setAll(isAll);
+		nodes.push(declaration);
+		return VisitOptions.CONTINUE;
+	}	
 }

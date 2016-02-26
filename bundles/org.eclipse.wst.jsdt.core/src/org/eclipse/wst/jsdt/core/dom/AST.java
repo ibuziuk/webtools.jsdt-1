@@ -2564,6 +2564,29 @@ public final class AST {
 		MetaProperty result = new MetaProperty(this);
 		return result;
 	}
+	
+	/**
+	 * Creates and returns a new unparented meta property node
+	 * owned by this AST.
+	 *
+	 * @return a new unparented  meta property node
+	 */	
+	public ModuleSpecifier newModuleSpecifier() {
+		ModuleSpecifier result = new ModuleSpecifier(this);
+		return result;
+	}
+	
+	/**
+	 * Creates and returns a new unparented meta property node
+	 * owned by this AST.
+	 *
+	 * @return a new unparented  meta property node
+	 */	
+	public ExportDeclaration newExportDeclaration() {
+		ExportDeclaration result = new ExportDeclaration(this);
+		return result;
+	}
+
 
 	/**
 	 * Enables the recording of changes to the given compilation
@@ -2657,5 +2680,8 @@ public final class AST {
 	void setFlag(int newValue) {
 		this.bits |= newValue;
 	}
+
+	
+	
 }
 

@@ -521,6 +521,7 @@ public class ASTMatcher {
 		return (
 			safeSubtreeMatch(node.getPackage(), o.getPackage())
 				&& safeSubtreeListMatch(node.imports(), o.imports())
+				&& safeSubtreeListMatch(node.exports(), o.exports())
 				&& safeSubtreeListMatch(node.types(), o.types()));
 	}
 
@@ -860,7 +861,9 @@ public class ASTMatcher {
 		}
 		return (
 			safeSubtreeMatch(node.getName(), o.getName())
-				&& node.isOnDemand() == o.isOnDemand());
+				&& node.isOnDemand() == o.isOnDemand()
+				&& safeSubtreeMatch(node.getSource(), o.getSource())
+				&& safeSubtreeListMatch(node.specifiers(), o.specifiers()));
 	}
 
 
@@ -2275,6 +2278,39 @@ public class ASTMatcher {
 		return o.getMeta().equals(metaProperty.getMeta()) 
 					&& o.getPropertyName().equals(metaProperty.getPropertyName());
 			
+	}
+
+	/**
+	 * @param moduleSpecifier
+	 * @param other
+	 * @return
+	 */
+	public boolean match(ModuleSpecifier moduleSpecifier, Object other) {
+		if(!(other instanceof ModuleSpecifier)){
+			return false;
+		}
+		ModuleSpecifier o = (ModuleSpecifier) other;
+		return (moduleSpecifier.isDefault() == o.isDefault())
+					&& (moduleSpecifier.isNamespace() == o.isNamespace())
+					&& safeSubtreeMatch(o.getLocal(), moduleSpecifier.getLocal())
+					&& safeSubtreeMatch(o.getDiscoverableName(), moduleSpecifier.getDiscoverableName());
+	}
+
+	/**
+	 * @param exportDeclaration
+	 * @param other
+	 * @return
+	 */
+	public boolean match(ExportDeclaration exportDeclaration, Object other) {
+		if(!(other instanceof ExportDeclaration)){
+			return false;
+		}
+		ExportDeclaration o = (ExportDeclaration) other;
+		return (exportDeclaration.isDefault() == o.isDefault())
+			&& (exportDeclaration.isAll() == o.isAll())
+			&& safeSubtreeMatch(exportDeclaration.getDeclaration(), o.getDeclaration())
+			&& safeSubtreeMatch(exportDeclaration.getSource(), o.getSource())
+			&& safeSubtreeListMatch(exportDeclaration.specifiers(), o.specifiers());			
 	}
 
 }

@@ -674,6 +674,8 @@ public abstract class ASTNode {
 	public static final int REST_ELEMENT_NAME = 104;
 	public static final int SPREAD_ELEMENT = 105;
 	public static final int META_PROPERTY = 106;
+	public static final int MODULE_SPECIFIER = 107;
+	public static final int EXPORT_DECLARATION = 108;
 
 
 
@@ -850,6 +852,26 @@ public abstract class ASTNode {
 				return DebuggerStatement.class;
 			case PROPERTY_NAME:
 				return PropertyName.class;
+			case ARRAY_NAME:
+				return ArrayName.class;
+			case OBJECT_NAME:
+				return ObjectName.class;
+			case TEMPLATE_LITERAL:
+				return TemplateLiteral.class;
+			case TEMPLATE_ELEMENT:
+				return TemplateElement.class;
+			case ASSIGNMENT_NAME:
+				return AssignmentName.class;
+			case REST_ELEMENT_NAME:
+				return RestElementName.class;
+			case SPREAD_ELEMENT:
+				return SpreadElement.class;
+			case META_PROPERTY:
+				return MetaProperty.class;
+			case MODULE_SPECIFIER:
+				return ModuleSpecifier.class;
+			case EXPORT_DECLARATION:
+				return ExportDeclaration.class;
 		}
 		throw new IllegalArgumentException();
 	}

@@ -8,7 +8,7 @@
  * 	Contributors:
  * 		 Red Hat Inc. - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.eclipse.wst.jsdt.unittests.esprima;
+package org.eclipse.wst.jsdt.core.tests.esprima;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.eclipse.wst.jsdt.core.dom.ASTNode;
@@ -41,6 +42,7 @@ import org.eclipse.wst.jsdt.core.dom.ContinueStatement;
 import org.eclipse.wst.jsdt.core.dom.DebuggerStatement;
 import org.eclipse.wst.jsdt.core.dom.DoStatement;
 import org.eclipse.wst.jsdt.core.dom.EmptyStatement;
+import org.eclipse.wst.jsdt.core.dom.ExportDeclaration;
 import org.eclipse.wst.jsdt.core.dom.Expression;
 import org.eclipse.wst.jsdt.core.dom.ExpressionStatement;
 import org.eclipse.wst.jsdt.core.dom.FieldAccess;
@@ -51,11 +53,13 @@ import org.eclipse.wst.jsdt.core.dom.FunctionDeclaration;
 import org.eclipse.wst.jsdt.core.dom.FunctionExpression;
 import org.eclipse.wst.jsdt.core.dom.FunctionInvocation;
 import org.eclipse.wst.jsdt.core.dom.IfStatement;
+import org.eclipse.wst.jsdt.core.dom.ImportDeclaration;
 import org.eclipse.wst.jsdt.core.dom.InfixExpression;
 import org.eclipse.wst.jsdt.core.dom.JavaScriptUnit;
 import org.eclipse.wst.jsdt.core.dom.LabeledStatement;
 import org.eclipse.wst.jsdt.core.dom.ListExpression;
 import org.eclipse.wst.jsdt.core.dom.MetaProperty;
+import org.eclipse.wst.jsdt.core.dom.ModuleSpecifier;
 import org.eclipse.wst.jsdt.core.dom.NumberLiteral;
 import org.eclipse.wst.jsdt.core.dom.ObjectLiteral;
 import org.eclipse.wst.jsdt.core.dom.ObjectLiteralField;
@@ -83,6 +87,7 @@ import org.eclipse.wst.jsdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.wst.jsdt.core.dom.VariableKind;
 import org.eclipse.wst.jsdt.core.dom.WhileStatement;
 import org.eclipse.wst.jsdt.core.dom.WithStatement;
+import org.eclipse.wst.jsdt.core.dom.YieldExpression;
 import org.eclipse.wst.jsdt.internal.esprima.EsprimaParser;
 import org.junit.Test;
 
@@ -449,6 +454,7 @@ public class EsprimaParserTests {
 		}
 		fail();
 	}	
+	
 	@Test
 	public void testBlockStatement(){
 		JavaScriptUnit unit = parse("{a=2;};");
@@ -470,6 +476,18 @@ public class EsprimaParserTests {
 		fail();
 	}	
 
+	@Test
+	public void testYieldExpression(){
+		JavaScriptUnit unit = parse("function* foo(){yield index++;}");
+		assertNotNull(unit);
+		FunctionDeclaration func = (FunctionDeclaration)unit.statements().get(0);
+		ExpressionStatement stmt = (ExpressionStatement) func.getBody().statements().get(0);
+		assertEquals(ASTNode.YIELD_EXPRESSION,stmt.getExpression().getNodeType());
+		YieldExpression yieldE = (YieldExpression) stmt.getExpression();
+		assertFalse(yieldE.getDelegate());
+		assertNotNull(yieldE.getArgument());
+	}
+	
 	@Test
 	public void testEmptyStatement(){
 		JavaScriptUnit unit = parse("{;};");
@@ -695,6 +713,23 @@ public class EsprimaParserTests {
 				CatchClause cc = (CatchClause) ts.catchClauses().get(0);
 				assertEquals("e",cc.getException().getName().getIdentifier());
 				assertNotNull(ts.getFinally());
+				return;
+			}
+		}
+		fail();
+	}
+	
+	@Test
+	public void testTryCatchObjectPattern(){
+		JavaScriptUnit unit = parse("try{}catch({a,b}){}");
+		assertNotNull(unit);
+		List<ASTNode> statements = unit.statements();
+		for (ASTNode astNode : statements) {
+			if(astNode.getNodeType() == ASTNode.TRY_STATEMENT){
+				TryStatement ts = (TryStatement) astNode;
+				assertEquals(1,ts.catchClauses().size());
+				CatchClause cc = (CatchClause) ts.catchClauses().get(0);
+				assertNotNull(cc.getException().getPattern());
 				return;
 			}
 		}
@@ -1179,7 +1214,120 @@ public class EsprimaParserTests {
 		assertEquals("initialize",((SimpleName)field.getFieldName()).getIdentifier());
 
 	}
+
+	@Test
+	public void testImport_1(){
+		JavaScriptUnit unit = parse("import {foo} from 'lib';");
+		assertFalse(unit.imports().isEmpty());
+		ImportDeclaration importDeclaration = (ImportDeclaration) unit.imports().get(0);
+		assertEquals("'lib'", importDeclaration.getSource().getLiteralValue());
+		assertFalse(importDeclaration.specifiers().isEmpty());
+		ModuleSpecifier specifier = (ModuleSpecifier) importDeclaration.specifiers().get(0);
+		assertEquals("foo", specifier.getLocal().getIdentifier());
+		assertEquals("foo", specifier.getDiscoverableName().getIdentifier());
+		assertFalse(specifier.isDefault());
+		assertFalse(specifier.isNamespace());
+	}
 	
+	@Test
+	public void testImport_2(){
+		JavaScriptUnit unit = parse("import {foo as baz} from 'lib';");
+		assertFalse(unit.imports().isEmpty());
+		ImportDeclaration importDeclaration = (ImportDeclaration) unit.imports().get(0);
+		assertEquals("'lib'", importDeclaration.getSource().getLiteralValue());
+		assertFalse(importDeclaration.specifiers().isEmpty());
+		ModuleSpecifier specifier = (ModuleSpecifier) importDeclaration.specifiers().get(0);
+		assertEquals("baz", specifier.getLocal().getIdentifier());
+		assertEquals("foo", specifier.getDiscoverableName().getIdentifier());
+		assertFalse(specifier.isDefault());
+		assertFalse(specifier.isNamespace());
+	}
+	
+	@Test
+	public void testImport_3(){
+		JavaScriptUnit unit = parse("import foo from 'lib';");
+		assertFalse(unit.imports().isEmpty());
+		ImportDeclaration importDeclaration = (ImportDeclaration) unit.imports().get(0);
+		assertEquals("'lib'", importDeclaration.getSource().getLiteralValue());
+		assertFalse(importDeclaration.specifiers().isEmpty());
+		ModuleSpecifier specifier = (ModuleSpecifier) importDeclaration.specifiers().get(0);
+		assertEquals("foo", specifier.getLocal().getIdentifier());
+		assertTrue(specifier.isDefault());
+		assertFalse(specifier.isNamespace());
+	}
+	
+	@Test
+	public void testImport_4(){
+		JavaScriptUnit unit = parse("import * as foo from 'lib';");
+		assertFalse(unit.imports().isEmpty());
+		ImportDeclaration importDeclaration = (ImportDeclaration) unit.imports().get(0);
+		assertEquals("'lib'", importDeclaration.getSource().getLiteralValue());
+		assertFalse(importDeclaration.specifiers().isEmpty());
+		ModuleSpecifier specifier = (ModuleSpecifier) importDeclaration.specifiers().get(0);
+		assertEquals("foo", specifier.getLocal().getIdentifier());
+		assertTrue(specifier.isDefault());
+		assertFalse(specifier.isNamespace());
+	}
+	
+	@Test
+	public void testExport_1(){
+		JavaScriptUnit unit = parse("export {foo, bar};");
+		assertFalse(unit.exports().isEmpty());
+		ExportDeclaration export = (ExportDeclaration) unit.exports().get(0);
+		assertEquals(2, export.specifiers().size());
+		ModuleSpecifier specifier = (ModuleSpecifier) export.specifiers().get(0);
+		assertEquals("foo",specifier.getLocal().getIdentifier());
+	}
+	
+	@Test
+	public void testExport_2(){
+		JavaScriptUnit unit = parse("export {foo} from 'mod';");
+		assertFalse(unit.exports().isEmpty());
+		ExportDeclaration export = (ExportDeclaration) unit.exports().get(0);
+		assertEquals("'mod'",export.getSource().getLiteralValue());
+		assertEquals(1, export.specifiers().size());
+		ModuleSpecifier specifier = (ModuleSpecifier) export.specifiers().get(0);
+		assertEquals("foo",specifier.getLocal().getIdentifier());
+	}
+	
+	@Test
+	public void testExport_3(){
+		JavaScriptUnit unit = parse("export var foo = 1;");
+		assertFalse(unit.exports().isEmpty());
+		ExportDeclaration export = (ExportDeclaration) unit.exports().get(0);
+		assertNotNull(export.getDeclaration());
+	}
+	
+	@Test
+	public void testExport_4(){
+		JavaScriptUnit unit = parse("export default function () {}");
+		assertFalse(unit.exports().isEmpty());
+		ExportDeclaration export = (ExportDeclaration) unit.exports().get(0);
+		assertNotNull(export.getDeclaration());
+		assertTrue(export.isDefault());
+	}
+	
+	@Test
+	public void testExport_5(){
+		JavaScriptUnit unit = parse("export * from 'mod';");
+		assertFalse(unit.exports().isEmpty());
+		ExportDeclaration export = (ExportDeclaration) unit.exports().get(0);
+		assertTrue(export.isAll());
+	}
+	
+	@Test
+	public void testExport_6(){
+		JavaScriptUnit unit = parse("export function* agen(){}");
+		assertFalse(unit.exports().isEmpty());
+		ExportDeclaration export = (ExportDeclaration) unit.exports().get(0);
+		assertNotNull(export.getDeclaration());
+		assertEquals(ASTNode.FUNCTION_DECLARATION, export.getDeclaration().getNodeType());
+		FunctionDeclaration func = (FunctionDeclaration)export.getDeclaration();
+		assertEquals("agen", func.getMethodName().toString());
+		assertTrue(func.isGenerator());
+		
+		
+	}
 	// #### Everything.js tests.
 	
 	@Test
@@ -1192,12 +1340,11 @@ public class EsprimaParserTests {
 		testEverythingJs("es2015-script.js");
 	}
 	
-//	@Test
-//	public void testEverythingJS_es2015_module(){
-//		testEverythingJs("es2015-module.js");
-//	}
+	@Test
+	public void testEverythingJS_es2015_module(){
+		testEverythingJs("es2015-module.js");
+	}
 
-	
 	private JavaScriptUnit parse(String content){
 		return EsprimaParser.newParser().setSource(content).parse();
 	}
@@ -1214,7 +1361,7 @@ public class EsprimaParserTests {
 		StringBuilder sb = new StringBuilder();
 		String line;
 		try {
-			br = new BufferedReader(new InputStreamReader(input));
+			br = new BufferedReader(new InputStreamReader(input,Charset.forName("UTF-8")));
 			while ((line = br.readLine()) != null) {
 				sb.append(line);
 				sb.append("\n");
