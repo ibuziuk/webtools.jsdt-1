@@ -172,6 +172,12 @@ public final class JavaScriptCore extends Plugin {
 	 * (value <code>"org.eclipse.wst.jsdt.core.javascriptValidator"</code>).
 	 */
 	public static final String BUILDER_ID = PLUGIN_ID + ".javascriptValidator" ; //$NON-NLS-1$
+	
+	/**
+	 * The identifier for the Validation builder
+	 * @since 1.3
+	 */
+	public final static String VALIDATION_BUILDER_ID = "org.eclipse.wst.validation.validationbuilder"; //$NON-NLS-1$
 
 	/**
 	 * The identifier for the JavaScript model
