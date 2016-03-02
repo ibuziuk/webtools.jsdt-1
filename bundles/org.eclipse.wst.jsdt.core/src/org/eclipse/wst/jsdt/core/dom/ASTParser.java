@@ -15,9 +15,9 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.jsdt.core.IClassFile;
-import org.eclipse.wst.jsdt.core.IJavaScriptUnit;
 import org.eclipse.wst.jsdt.core.IJavaScriptElement;
 import org.eclipse.wst.jsdt.core.IJavaScriptProject;
+import org.eclipse.wst.jsdt.core.IJavaScriptUnit;
 import org.eclipse.wst.jsdt.core.ITypeRoot;
 import org.eclipse.wst.jsdt.core.JavaScriptCore;
 import org.eclipse.wst.jsdt.core.JavaScriptModelException;
@@ -859,51 +859,7 @@ public class ASTParser {
 					} else {
 						throw new IllegalStateException();
 					}
-					if (this.partial) {
-						searcher = new NodeSearcher(this.focalPointPosition);
-					}
-					int flags = 0;
-					if (this.statementsRecovery) flags |= IJavaScriptUnit.ENABLE_STATEMENTS_RECOVERY;
-					if (needToResolveBindings) {
-						if (this.bindingsRecovery) flags |= IJavaScriptUnit.ENABLE_BINDINGS_RECOVERY;
-						try {
-							// parse and resolve
-							compilationUnitDeclaration =
-								JavaScriptUnitResolver.resolve(
-									sourceUnit,
-									this.project,
-									searcher,
-									this.compilerOptions,
-									this.workingCopyOwner,
-									flags,
-									monitor);
-						} catch (JavaScriptModelException e) {
-							flags &= ~IJavaScriptUnit.ENABLE_BINDINGS_RECOVERY;
-							compilationUnitDeclaration = JavaScriptUnitResolver.parse(
-									sourceUnit,
-									searcher,
-									this.compilerOptions,
-									flags);
-							needToResolveBindings = false;
-						}
-					} else {
-						compilationUnitDeclaration = JavaScriptUnitResolver.parse(
-								sourceUnit,
-								searcher,
-								this.compilerOptions,
-								flags);
-						needToResolveBindings = false;
-					}
-					JavaScriptUnit result = JavaScriptUnitResolver.convert(
-						compilationUnitDeclaration,
-						sourceUnit.getContents(),
-						this.apiLevel,
-						this.compilerOptions,
-						needToResolveBindings,
-						wcOwner,
-						needToResolveBindings ? new DefaultBindingResolver.BindingTables() : null,
-						flags,
-						monitor);
+					JavaScriptUnit result = EsprimaParser.newParser().setSource(String.valueOf(sourceUnit.getContents())).parse();
 					result.setTypeRoot(this.typeRoot);
 					return result;
 				} finally {
