@@ -23,7 +23,6 @@ import javax.script.ScriptException;
 
 import org.eclipse.wst.jsdt.core.IJavaScriptUnit;
 import org.eclipse.wst.jsdt.core.JavaScriptModelException;
-import org.eclipse.wst.jsdt.core.compiler.IProblem;
 import org.eclipse.wst.jsdt.core.dom.AST;
 import org.eclipse.wst.jsdt.core.dom.JavaScriptUnit;
 import org.eclipse.wst.jsdt.internal.compiler.problem.DefaultProblem;
@@ -128,7 +127,7 @@ public class EsprimaParser {
 			}
 		}catch(ECMAException e)
 		{
-			result.setProblems(new IProblem[]{createProblem((ScriptObjectMirror)e.getEcmaError())});
+			result.setProblems(new DefaultProblem[]{createProblem((ScriptObjectMirror)e.getEcmaError())});
 		}
 		return result;
 	}
@@ -201,7 +200,7 @@ public class EsprimaParser {
 	 */
 	private void reportErrors(final ScriptObjectMirror jsObject, final JavaScriptUnit result) {
 		ScriptObjectMirror errors = (ScriptObjectMirror) jsObject.getMember("errors");
-		IProblem[] problems = new IProblem[errors.size()];
+		DefaultProblem[] problems = new DefaultProblem[errors.size()];
 		for(int i = 0; i < errors.size(); i++){
 			ScriptObjectMirror obj = (ScriptObjectMirror) errors.getSlot(i);
 			problems[i]=createProblem(obj);
@@ -209,7 +208,7 @@ public class EsprimaParser {
 		result.setProblems(problems);
 	}
 	
-	private IProblem createProblem(final ScriptObjectMirror error){
+	private DefaultProblem createProblem(final ScriptObjectMirror error){
 		String description = (String) error.getMember("description");
 		Number index = (Number) error.getMember("index");
 		Number line = (Number) error.getMember("lineNumber");
@@ -224,7 +223,7 @@ public class EsprimaParser {
 					description,
 					0, 
 					null, 
-					ProblemSeverities.Fatal, 
+					ProblemSeverities.Error, 
 					0, 
 					0,
 					line.intValue(),
