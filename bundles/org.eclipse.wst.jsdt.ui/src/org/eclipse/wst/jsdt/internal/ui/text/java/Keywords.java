@@ -13,10 +13,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Keywords {
-	
+
 	private static Keywords instance;
 	private final Set<String> keywords;
-	
+
 	private Keywords() {
 		keywords = new HashSet<String>(27);
 		keywords.add("break");      //$NON-NLS-1$
@@ -40,9 +40,11 @@ public class Keywords {
 		keywords.add("import");     //$NON-NLS-1$
 		keywords.add("in");         //$NON-NLS-1$
 		keywords.add("instanceof"); //$NON-NLS-1$
+		keywords.add("let");        //$NON-NLS-1$
 		keywords.add("new");        //$NON-NLS-1$
 		keywords.add("return");     //$NON-NLS-1$
 		keywords.add("super");      //$NON-NLS-1$
+		keywords.add("static");     //$NON-NLS-1$
 		keywords.add("switch");     //$NON-NLS-1$
 		keywords.add("this");       //$NON-NLS-1$
 		keywords.add("throw");      //$NON-NLS-1$
@@ -54,14 +56,14 @@ public class Keywords {
 		keywords.add("with");       //$NON-NLS-1$
 		keywords.add("yield");      //$NON-NLS-1$
 	}
-	
+
 	public static Keywords getInstance() {
 		if (instance == null) {
 			instance = new Keywords();
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * Returns whether string should be recognized as a keyword, regardless of case.
 	 * @param string The string being tested.
@@ -70,7 +72,7 @@ public class Keywords {
 	public boolean isKeyword(String string) {
 		return keywords.contains(string.toLowerCase());
 	}
-	
+
 	/**
 	 * Returns the keywords whose prefix is string, regardless of case.
 	 * @param string The string being tested.
@@ -79,5 +81,5 @@ public class Keywords {
 	public List<String> getMatchingKeywords(String string) {
 		return keywords.stream().filter(k -> k.startsWith(string.toLowerCase())).collect(Collectors.toList());
 	}
-	
+
 }

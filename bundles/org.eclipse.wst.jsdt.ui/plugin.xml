@@ -271,6 +271,7 @@
 		<javaCompletionProposalComputer
 			class="org.eclipse.wst.jsdt.internal.ui.text.java.KeywordCompletionProposalComputer"
 			categoryId="defaultProposalCategory">
+			<partition type="__dftl_partition_content_type"/>
 		</javaCompletionProposalComputer>
 	</extension>
 	

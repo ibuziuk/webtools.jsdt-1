@@ -24,10 +24,7 @@ import org.eclipse.wst.jsdt.internal.ui.text.java.Keywords;
 
 public class KeywordEngine {
 
-	/** The context type. */
 	private CompilationUnitContextType fContextType;
-	
-	/** The result proposals. */
 	private ArrayList<KeywordProposal> fProposals = new ArrayList<KeywordProposal>();
 	
 	public KeywordEngine(CompilationUnitContextType contextType) {
@@ -36,8 +33,7 @@ public class KeywordEngine {
 	}
 
 	public void complete(ITextViewer viewer, int completionPosition, IJavaScriptUnit compilationUnit) {
-	    IDocument document = viewer.getDocument();
-
+		IDocument document = viewer.getDocument();
 		Point selection = viewer.getSelectedRange();
 		Position position = new Position(completionPosition, selection.y);
 
@@ -47,7 +43,6 @@ public class KeywordEngine {
 		IRegion region = new Region(start, end - start);
 		
 		Keywords keywords = Keywords.getInstance();
-		
 		List<String> matchingKeywords = keywords.getMatchingKeywords(context.getKey());
 		
 		for (String keywordName : matchingKeywords) {
@@ -62,7 +57,7 @@ public class KeywordEngine {
 	}
 
 	/**
-	 * Returns the array of matching keywords.
+	 * Returns matching keywords.
 	 */
 	public KeywordProposal[] getResults() {
 		return fProposals.toArray(new KeywordProposal[fProposals.size()]);

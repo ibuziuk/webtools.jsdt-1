@@ -38,13 +38,11 @@ public class KeywordCompletionProposalComputer implements IJavaCompletionProposa
 	}
 	
 	public void sessionStarted() {
-		// TODO: Figure out what to do on session start.
 	}
 
 	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		JavaContentAssistInvocationContext javaContext = (JavaContentAssistInvocationContext) context;
 		IJavaScriptUnit unit = javaContext.getCompilationUnit();
-		engine.reset();
 		engine.complete(javaContext.getViewer(), javaContext.getInvocationOffset(), unit);
 		
 		KeywordProposal[] keywordProposals =  engine.getResults();
@@ -58,12 +56,11 @@ public class KeywordCompletionProposalComputer implements IJavaCompletionProposa
 	}
 
 	public String getErrorMessage() {
-		// TODO: Figure out what error message to add.
-		return "";
+		return null;
 	}
 
 	public void sessionEnded() {
-		// TODO: Figure out what to do on session end.
+		engine.reset();
 	}
 
 }
