@@ -38,6 +38,7 @@ public class KeywordCompletionProposalComputer implements IJavaCompletionProposa
 	}
 	
 	public void sessionStarted() {
+		// do nothing
 	}
 
 	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
