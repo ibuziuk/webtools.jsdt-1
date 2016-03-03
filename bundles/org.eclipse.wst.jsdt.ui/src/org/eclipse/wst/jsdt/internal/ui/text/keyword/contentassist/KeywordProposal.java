@@ -28,7 +28,7 @@ import org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposal;
 public class KeywordProposal implements ICompletionProposal, IJavaCompletionProposal, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4 {
 
 	private final String keywordName;
-	private IRegion fSelectedRegion; // initialized by apply()
+	private IRegion fSelectedRegion;
 	private final IRegion fRegion;
 	
 	public KeywordProposal(String keywordName, IRegion fRegion) {
@@ -118,23 +118,25 @@ public class KeywordProposal implements ICompletionProposal, IJavaCompletionProp
 		}
 		catch (BadLocationException e) {
 			openErrorDialog(viewer.getTextWidget().getShell(), e);
-			fSelectedRegion= fRegion;
+			this.fSelectedRegion = fRegion;
 		}
 		
+		// Place the cursor at the end of the applied proposal.
 		this.fSelectedRegion = new Region(fRegion.getOffset() + this.keywordName.length(), 0);
-		
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
 	 */
 	public void selected(ITextViewer viewer, boolean smartToggle) {
+		// do nothing
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
 	 */
 	public void unselected(ITextViewer viewer) {
+		// do nothing
 	}
 
 	/* (non-Javadoc)
@@ -157,6 +159,8 @@ public class KeywordProposal implements ICompletionProposal, IJavaCompletionProp
 	 * @see org.eclipse.wst.jsdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
 	public int getRelevance() {
+		// TODO: Compute the relevance for the given keyword. Note that TemplateProposals are meant to have
+		// a higher relevance than keywords for a reason I'm unaware of.
 		return 0;
 	}
 
