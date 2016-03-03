@@ -22,7 +22,7 @@ import org.eclipse.wst.jsdt.core.JavaScriptModelException;
 import org.eclipse.wst.jsdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.wst.jsdt.internal.ui.JavaScriptPlugin;
 import org.eclipse.wst.jsdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.wst.jsdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.ContentAssistHistory.RHSHistory;
 
 /**
  * Describes the context of a content assist invocation in a JavaScript editor.

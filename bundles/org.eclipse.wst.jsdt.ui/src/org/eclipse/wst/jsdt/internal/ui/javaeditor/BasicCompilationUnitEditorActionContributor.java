@@ -32,8 +32,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 import org.eclipse.wst.jsdt.internal.ui.JavaPluginImages;
-import org.eclipse.wst.jsdt.internal.ui.text.java.CompletionProposalCategory;
-import org.eclipse.wst.jsdt.internal.ui.text.java.CompletionProposalComputerRegistry;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.CompletionProposalCategory;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.CompletionProposalComputerRegistry;
 import org.eclipse.wst.jsdt.ui.actions.JdtActionConstants;
 
 

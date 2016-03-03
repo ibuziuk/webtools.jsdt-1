@@ -23,8 +23,8 @@ import org.eclipse.wst.jsdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.wst.jsdt.internal.ui.text.JavaColorManager;
 import org.eclipse.wst.jsdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.wst.jsdt.internal.ui.text.SingleTokenJavaScanner;
-import org.eclipse.wst.jsdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.wst.jsdt.internal.ui.text.javadoc.JavaDocScanner;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.JavaCodeScanner;
 
 
 /**

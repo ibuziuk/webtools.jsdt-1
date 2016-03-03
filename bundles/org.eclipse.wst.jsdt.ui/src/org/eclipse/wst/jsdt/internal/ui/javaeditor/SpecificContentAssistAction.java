@@ -24,8 +24,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.IUpdate;
-import org.eclipse.wst.jsdt.internal.ui.text.java.CompletionProposalCategory;
-import org.eclipse.wst.jsdt.internal.ui.text.java.CompletionProposalComputerRegistry;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.CompletionProposalCategory;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.CompletionProposalComputerRegistry;
 import org.eclipse.wst.jsdt.ui.text.IJavaScriptPartitions;
 
 /**

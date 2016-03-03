@@ -69,7 +69,7 @@ import org.eclipse.wst.jsdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.wst.jsdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.wst.jsdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.wst.jsdt.internal.ui.text.comment.CommentFormattingStrategy;
-import org.eclipse.wst.jsdt.internal.ui.text.java.JavaFormattingStrategy;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.JavaFormattingStrategy;
 import org.eclipse.wst.jsdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.wst.jsdt.ui.JavaScriptUI;
 import org.eclipse.wst.jsdt.ui.text.IJavaScriptPartitions;

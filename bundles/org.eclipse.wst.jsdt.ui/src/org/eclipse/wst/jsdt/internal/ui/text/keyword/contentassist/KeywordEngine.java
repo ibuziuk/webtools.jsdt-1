@@ -20,7 +20,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.wst.jsdt.core.IJavaScriptUnit;
 import org.eclipse.wst.jsdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.wst.jsdt.internal.corext.template.java.CompilationUnitContextType;
-import org.eclipse.wst.jsdt.internal.ui.text.java.Keywords;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.Keywords;
 
 public class KeywordEngine {
 

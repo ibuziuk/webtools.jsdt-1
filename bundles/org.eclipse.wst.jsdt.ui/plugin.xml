@@ -205,7 +205,7 @@
 		point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer"
 		id="JavaNoTypeCompletionProposalComputer">
 		<javaCompletionProposalComputer 
-			class="org.eclipse.wst.jsdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer"
+			class="org.eclipse.wst.jsdt.internal.ui.text.javascript.JavaNoTypeCompletionProposalComputer"
 			categoryId="org.eclipse.wst.jsdt.ui.javaNoTypeProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_string"/>
@@ -244,7 +244,7 @@
 		point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer"
 		id="TemplateProposalComputer">
 		<javaCompletionProposalComputer
-			class="org.eclipse.wst.jsdt.internal.ui.text.java.TemplateCompletionProposalComputer"
+			class="org.eclipse.wst.jsdt.internal.ui.text.javascript.TemplateCompletionProposalComputer"
 			categoryId="org.eclipse.wst.jsdt.ui.templateProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_singleline_comment"/> <!-- to get NLS templates -->
@@ -256,7 +256,7 @@
 		point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer"
 		id="HippieCompletionProposalComputer">
 		<javaCompletionProposalComputer
-			class="org.eclipse.wst.jsdt.internal.ui.text.java.HippieProposalComputer"
+			class="org.eclipse.wst.jsdt.internal.ui.text.javascript.HippieProposalComputer"
 			categoryId="org.eclipse.wst.jsdt.ui.textProposalCategory">
 			<partition type="__java_singleline_comment"/>
 			<partition type="__java_multiline_comment"/>
@@ -269,7 +269,7 @@
 		point="org.eclipse.wst.jsdt.ui.javaCompletionProposalComputer"
 		id="KeywordCompletionProposalComputer">
 		<javaCompletionProposalComputer
-			class="org.eclipse.wst.jsdt.internal.ui.text.java.KeywordCompletionProposalComputer"
+			class="org.eclipse.wst.jsdt.internal.ui.text.javascript.KeywordCompletionProposalComputer"
 			categoryId="defaultProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
 		</javaCompletionProposalComputer>
@@ -283,12 +283,12 @@
 			description="%SpecificContentAssist.desc"
 			id="org.eclipse.wst.jsdt.ui.specific_content_assist.command"
 			name="%SpecificContentAssist.name"
-			defaultHandler="org.eclipse.wst.jsdt.internal.ui.text.java.JavaContentAssistHandler">
+			defaultHandler="org.eclipse.wst.jsdt.internal.ui.text.javascript.JavaContentAssistHandler">
 			<commandParameter
 				id="org.eclipse.wst.jsdt.ui.specific_content_assist.category_id"
 				name="%SpecificContentAssist.param"
 				optional="false"
-				values="org.eclipse.wst.jsdt.internal.ui.text.java.ContentAssistComputerParameter"/>
+				values="org.eclipse.wst.jsdt.internal.ui.text.javascript.ContentAssistComputerParameter"/>
 		</command>
 	</extension>
 	
@@ -297,11 +297,11 @@
 		<proposalSorter
 			id="org.eclipse.wst.jsdt.ui.RelevanceSorter"
 			name="%RelevanceSorter.name"
-			class="org.eclipse.wst.jsdt.internal.ui.text.java.RelevanceSorter"/>
+			class="org.eclipse.wst.jsdt.internal.ui.text.javascript.RelevanceSorter"/>
 		<proposalSorter
 			id="org.eclipse.wst.jsdt.ui.AlphabeticSorter"
 			name="%AlphabeticSorter.name"
-			class="org.eclipse.wst.jsdt.internal.ui.text.java.AlphabeticSorter"/>
+			class="org.eclipse.wst.jsdt.internal.ui.text.javascript.AlphabeticSorter"/>
 	</extension>
 	
 	<!-- commands to surface JavaScript elements given handle id encoded parameter -->
