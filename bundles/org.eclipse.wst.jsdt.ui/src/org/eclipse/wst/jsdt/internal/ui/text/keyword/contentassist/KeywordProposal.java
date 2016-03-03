@@ -144,7 +144,7 @@ public class KeywordProposal implements ICompletionProposal, IJavaCompletionProp
 	 */
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		try {
-			int replaceOffset= fRegion.getOffset();
+			int replaceOffset = fRegion.getOffset();
 			if (offset >= replaceOffset) {
 				String content = document.get(replaceOffset, offset - replaceOffset);
 				return this.keywordName.toLowerCase().startsWith(content.toLowerCase());
