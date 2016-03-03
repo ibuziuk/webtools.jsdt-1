@@ -20,7 +20,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.wst.jsdt.core.IJavaScriptUnit;
 import org.eclipse.wst.jsdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.wst.jsdt.internal.corext.template.java.CompilationUnitContextType;
-import org.eclipse.wst.jsdt.internal.ui.text.javascript.Keywords;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.KeywordUtil;
 
 public class KeywordEngine {
 
@@ -42,7 +42,7 @@ public class KeywordEngine {
 		int end = context.getEnd();
 		IRegion region = new Region(start, end - start);
 		
-		Keywords keywords = Keywords.getInstance();
+		KeywordUtil keywords = KeywordUtil.getInstance();
 		List<String> matchingKeywords = keywords.getMatchingKeywords(context.getKey());
 		
 		for (String keywordName : matchingKeywords) {

@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Keywords {
+public class KeywordUtil {
 
-	private static Keywords instance;
+	private static KeywordUtil instance;
 	private final Set<String> keywords;
 
-	private Keywords() {
+	private KeywordUtil() {
 		keywords = new HashSet<String>(27);
 		keywords.add("break");      //$NON-NLS-1$
 		keywords.add("case");       //$NON-NLS-1$
@@ -57,9 +57,9 @@ public class Keywords {
 		keywords.add("yield");      //$NON-NLS-1$
 	}
 
-	public static Keywords getInstance() {
+	public static KeywordUtil getInstance() {
 		if (instance == null) {
-			instance = new Keywords();
+			instance = new KeywordUtil();
 		}
 		return instance;
 	}
@@ -80,6 +80,10 @@ public class Keywords {
 	 */
 	public List<String> getMatchingKeywords(String string) {
 		return keywords.stream().filter(k -> k.startsWith(string.toLowerCase())).collect(Collectors.toList());
+	}
+	
+	public Set<String> getKeywords() {
+		return keywords;
 	}
 
 }

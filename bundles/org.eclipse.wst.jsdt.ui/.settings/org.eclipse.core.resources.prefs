@@ -1,5 +1,5 @@
 eclipse.preferences.version=1
-encoding//src/org/eclipse/wst/jsdt/internal/ui/text/javascript/Keywords.java=UTF-8
+encoding//src/org/eclipse/wst/jsdt/internal/ui/text/javascript/KeywordUtil.java=UTF-8
 encoding//src/org/eclipse/wst/jsdt/internal/ui/text/keyword/contentassist/KeywordEngine.java=UTF-8
 encoding//src/org/eclipse/wst/jsdt/internal/ui/text/keyword/contentassist/KeywordProposal.java=UTF-8
 encoding/<project>=ISO-8859-1

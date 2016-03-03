@@ -111,7 +111,7 @@ public final class TemplateCompletionProposalComputer implements IJavaCompletion
 								continue outer;
 							}
 						}
-						if (Keywords.getInstance().isKeyword(name)) {
+						if (KeywordUtil.getInstance().isKeyword(name)) {
 							removals.add(curr);
 						}
 					}
