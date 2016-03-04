@@ -866,14 +866,7 @@ public class DOMASTConverter extends EStreeVisitor{
 	
 	private VisitOptions convertIdentifier(final ScriptObjectMirror object) {
 		final String s = (String)object.getMember("name");
-		SimpleName name = null;
-		try{
-			name = ast.newSimpleName(s);
-		}catch(IllegalArgumentException e){
-			// SimpleName does not allow keywords 
-			// try propertyName.
-			name = ast.newPropertyName(s);
-		}
+		SimpleName name = ast.newSimpleName(s);
 		nodes.push(name);
 		return VisitOptions.CONTINUE;
 	}

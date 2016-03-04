@@ -1081,14 +1081,6 @@ class NaiveASTFlattener extends ASTVisitor {
 	}
 	
 	/*
-	 * @see ASTVisitor#visit(SimpleName)
-	 */
-	public boolean visit(PropertyName node) {
-		this.buffer.append(node.getIdentifier());
-		return false;
-	}
-
-	/*
 	 * @see ASTVisitor#visit(SimpleType)
 	 */
 	public boolean visit(SimpleType node) {
