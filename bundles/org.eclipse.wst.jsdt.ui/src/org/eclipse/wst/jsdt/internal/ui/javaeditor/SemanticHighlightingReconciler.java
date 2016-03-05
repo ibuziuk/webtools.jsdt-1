@@ -39,7 +39,7 @@ import org.eclipse.wst.jsdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.wst.jsdt.internal.ui.JavaScriptPlugin;
 import org.eclipse.wst.jsdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
 import org.eclipse.wst.jsdt.internal.ui.javaeditor.SemanticHighlightingManager.Highlighting;
-import org.eclipse.wst.jsdt.internal.ui.text.java.IJavaReconcilingListener;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.IJavaReconcilingListener;
 
 
 /**

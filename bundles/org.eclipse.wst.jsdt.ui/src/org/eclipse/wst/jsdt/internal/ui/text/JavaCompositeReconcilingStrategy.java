@@ -19,8 +19,8 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.wst.jsdt.internal.ui.JavaScriptPlugin;
-import org.eclipse.wst.jsdt.internal.ui.text.java.IProblemRequestorExtension;
-import org.eclipse.wst.jsdt.internal.ui.text.java.JavaReconcilingStrategy;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.IProblemRequestorExtension;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.JavaReconcilingStrategy;
 import org.eclipse.wst.jsdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
 import org.eclipse.wst.jsdt.ui.text.IJavaScriptPartitions;
 

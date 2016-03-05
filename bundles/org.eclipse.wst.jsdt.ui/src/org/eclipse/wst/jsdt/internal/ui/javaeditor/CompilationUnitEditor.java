@@ -117,7 +117,7 @@ import org.eclipse.wst.jsdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.wst.jsdt.internal.ui.text.Symbols;
 import org.eclipse.wst.jsdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.wst.jsdt.internal.ui.text.correction.CorrectionCommandInstaller;
-import org.eclipse.wst.jsdt.internal.ui.text.java.IJavaReconcilingListener;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.IJavaReconcilingListener;
 import org.eclipse.wst.jsdt.ui.IWorkingCopyManager;
 import org.eclipse.wst.jsdt.ui.JavaScriptUI;
 import org.eclipse.wst.jsdt.ui.PreferenceConstants;

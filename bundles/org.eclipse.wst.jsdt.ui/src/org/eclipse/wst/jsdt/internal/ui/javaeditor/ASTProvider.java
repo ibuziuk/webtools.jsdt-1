@@ -340,7 +340,7 @@ public final class ASTProvider {
 	 * Informs that reconciling for the given element is about to be started.
 	 *
 	 * @param javaElement the Java element
-	 * @see org.eclipse.wst.jsdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
+	 * @see org.eclipse.wst.jsdt.internal.ui.text.javascript.IJavaReconcilingListener#aboutToBeReconciled()
 	 */
 	void aboutToBeReconciled(IJavaScriptElement javaElement) {
 

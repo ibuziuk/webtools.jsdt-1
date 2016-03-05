@@ -3233,7 +3233,7 @@ public class PreferenceConstants {
 	 * Value is an XML encoded version of the history.
 	 * </p>
 	 * 
-	 * @see org.eclipse.wst.jsdt.internal.ui.text.java.ContentAssistHistory#load(org.eclipse.core.runtime.Preferences, String)
+	 * @see org.eclipse.wst.jsdt.internal.ui.text.javascript.ContentAssistHistory#load(org.eclipse.core.runtime.Preferences, String)
 	 * 
 	 */
 	public static final String CODEASSIST_LRU_HISTORY= "content_assist_lru_history"; //$NON-NLS-1$
@@ -3244,7 +3244,7 @@ public class PreferenceConstants {
 	 * Value is a {@link String}.
 	 * </p>
 	 * 
-	 * @see org.eclipse.wst.jsdt.internal.ui.text.java.ProposalSorterRegistry
+	 * @see org.eclipse.wst.jsdt.internal.ui.text.javascript.ProposalSorterRegistry
 	 * 
 	 */
 	public static final String CODEASSIST_SORTER= "content_assist_sorter"; //$NON-NLS-1$

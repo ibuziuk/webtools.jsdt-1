@@ -106,7 +106,7 @@ import org.eclipse.wst.jsdt.internal.ui.JavaPluginImages;
 import org.eclipse.wst.jsdt.internal.ui.JavaScriptPlugin;
 import org.eclipse.wst.jsdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 import org.eclipse.wst.jsdt.internal.ui.text.correction.JavaCorrectionProcessor;
-import org.eclipse.wst.jsdt.internal.ui.text.java.IProblemRequestorExtension;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.IProblemRequestorExtension;
 import org.eclipse.wst.jsdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
 import org.eclipse.wst.jsdt.launching.JavaRuntime;
 import org.eclipse.wst.jsdt.ui.JavaScriptUI;

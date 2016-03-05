@@ -13,7 +13,7 @@ package org.eclipse.wst.jsdt.internal.ui.text.javadoc;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.wst.jsdt.core.CompletionProposal;
-import org.eclipse.wst.jsdt.internal.ui.text.java.LazyJavaCompletionProposal;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.LazyJavaCompletionProposal;
 import org.eclipse.wst.jsdt.ui.text.java.JavaContentAssistInvocationContext;
 
 /**

@@ -26,7 +26,7 @@ import org.eclipse.wst.jsdt.core.IJavaScriptProject;
 import org.eclipse.wst.jsdt.core.ITypeRoot;
 import org.eclipse.wst.jsdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.wst.jsdt.internal.ui.JavaScriptPlugin;
-import org.eclipse.wst.jsdt.internal.ui.text.java.JavaParameterListValidator;
+import org.eclipse.wst.jsdt.internal.ui.text.javascript.JavaParameterListValidator;
 import org.eclipse.wst.jsdt.internal.ui.text.template.contentassist.TemplateEngine;
 import org.eclipse.wst.jsdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.wst.jsdt.ui.text.java.CompletionProposalComparator;
