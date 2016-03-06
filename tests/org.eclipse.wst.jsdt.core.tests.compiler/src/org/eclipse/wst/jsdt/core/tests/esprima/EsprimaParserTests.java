@@ -72,6 +72,7 @@ import org.eclipse.wst.jsdt.core.dom.ReturnStatement;
 import org.eclipse.wst.jsdt.core.dom.SimpleName;
 import org.eclipse.wst.jsdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.wst.jsdt.core.dom.SpreadElement;
+import org.eclipse.wst.jsdt.core.dom.StringLiteral;
 import org.eclipse.wst.jsdt.core.dom.SwitchCase;
 import org.eclipse.wst.jsdt.core.dom.SwitchStatement;
 import org.eclipse.wst.jsdt.core.dom.TemplateElement;
@@ -1353,6 +1354,36 @@ public class EsprimaParserTests {
 		TypeDeclarationExpression dex = (TypeDeclarationExpression) es.getExpression();
 		TypeDeclaration td = (TypeDeclaration)dex.getDeclaration();
 		assertEquals("A", td.getName().getIdentifier());
+	}
+	
+	@Test 
+	public void tesArrayPatternAssignment(){
+		JavaScriptUnit unit = parse("[...a[0]] = 0;");
+		assertFalse(unit.statements().isEmpty());
+		ExpressionStatement expressionStatement = (ExpressionStatement)unit.statements().get(0);
+		assertEquals(ASTNode.ASSIGNMENT, expressionStatement.getExpression().getNodeType());
+		Assignment assignment = (Assignment)expressionStatement.getExpression();
+		assertEquals(ASTNode.ARRAY_NAME, assignment.getLeftHandSide().getNodeType());
+		ArrayName arrayName = (ArrayName)assignment.getLeftHandSide();
+		assertFalse(arrayName.elements().isEmpty());
+		RestElementName rest = (RestElementName)arrayName.elements().get(0);
+		assertEquals(ASTNode.ARRAY_ACCESS, rest.getArgument().getNodeType());
+		ArrayAccess access = (ArrayAccess)rest.getArgument();
+		assertEquals("a", ((SimpleName)access.getArray()).getIdentifier());
+		assertEquals("0", ((NumberLiteral)access.getIndex()).getToken());
+		
+	}
+	@Test 
+	public void tesArrayPatternAssignment_2(){
+		JavaScriptUnit unit = parse("[a,b=0,[c,...a[0]]={}]=0;");
+		assertFalse(unit.statements().isEmpty());
+		ExpressionStatement expressionStatement = (ExpressionStatement)unit.statements().get(0);
+		assertEquals(ASTNode.ASSIGNMENT, expressionStatement.getExpression().getNodeType());
+		Assignment assignment = (Assignment)expressionStatement.getExpression();
+		assertEquals(ASTNode.ARRAY_NAME, assignment.getLeftHandSide().getNodeType());
+		ArrayName arrayName = (ArrayName)assignment.getLeftHandSide();
+		assertEquals(3,arrayName.elements().size());
+		
 	}
 	
 	// #### Everything.js tests.

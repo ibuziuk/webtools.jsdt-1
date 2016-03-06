@@ -771,7 +771,7 @@ public class DOMASTConverter extends EStreeVisitor{
 			case REST_ELEMENT_NAME:
 				RestElementName ren = (RestElementName) parent;
 				if("argument".equals(key)){
-					ren.setArgument((Name) expression);
+					ren.setArgument(expression);
 				}
 				break;
 			case SPREAD_ELEMENT:

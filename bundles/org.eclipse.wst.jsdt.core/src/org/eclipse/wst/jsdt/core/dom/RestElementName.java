@@ -31,7 +31,7 @@ public class RestElementName extends Name {
 	 * The "argument" structural property of this node type
 	 */
 	public static final ChildPropertyDescriptor ARGUMENT_PROPERTY =
-				new ChildPropertyDescriptor(AssignmentName.class, "argument", Name.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
+				new ChildPropertyDescriptor(RestElementName.class, "argument", Expression.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
 
 	
@@ -44,7 +44,7 @@ public class RestElementName extends Name {
 
 	static {
 		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(2);
-		createPropertyList(AssignmentName.class, propertyList);
+		createPropertyList(RestElementName.class, propertyList);
 		addProperty(ARGUMENT_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS = reapPropertyList(propertyList);
 	}
@@ -63,7 +63,7 @@ public class RestElementName extends Name {
 		return PROPERTY_DESCRIPTORS;
 	}
 	
-	private Name argument;
+	private Expression argument;
 	
 	/**
 	 * @param ast
@@ -111,11 +111,11 @@ public class RestElementName extends Name {
 	}
 
 
-	public Name getArgument() {
+	public Expression getArgument() {
 		return argument;
 	}
 
-	public void setArgument(Name argument) {
+	public void setArgument(Expression argument) {
 		if (argument == null) {
 			throw new IllegalArgumentException();
 		}
@@ -138,7 +138,7 @@ public class RestElementName extends Name {
 	ASTNode clone0(AST target) {
 		RestElementName result = new RestElementName(target);
 		result.setSourceRange(this.getStartPosition(), this.getLength());
-		result.setArgument((Name) getArgument().clone(target));
+		result.setArgument((Expression) getArgument().clone(target));
 		return result;
 	}
 
