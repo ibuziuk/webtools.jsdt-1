@@ -675,6 +675,7 @@ public abstract class ASTNode {
 	public static final int META_PROPERTY = 105;
 	public static final int MODULE_SPECIFIER = 106;
 	public static final int EXPORT_DECLARATION = 107;
+	public static final int TYPE_DECLARATION_EXPRESSION = 108;
 
 
 
@@ -869,6 +870,8 @@ public abstract class ASTNode {
 				return ModuleSpecifier.class;
 			case EXPORT_DECLARATION:
 				return ExportDeclaration.class;
+			case TYPE_DECLARATION_EXPRESSION:
+				return TypeDeclarationExpression.class;
 		}
 		throw new IllegalArgumentException();
 	}

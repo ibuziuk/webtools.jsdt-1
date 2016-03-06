@@ -1641,6 +1641,31 @@ public final class AST {
 		}
 		return result;
 	}
+	
+	/**
+	 * Creates a new unparented local type declaration expression node
+	 * owned by this AST, for the given type declaration.
+	 * <p>
+	 * This method can be used to convert any kind of type declaration
+	 * (<code>AbstractTypeDeclaration</code>) into an expression
+	 * (<code>Expression</code>) by wrapping it.
+	 * </p>
+	 *
+	 *
+	 * @param declaratopn the type declaration
+	 * @return a new unparented local type declaration expression node
+	 * @exception IllegalArgumentException if:
+	 * <ul>
+	 * <li>the node belongs to a different AST</li>
+	 * <li>the node already has a parent</li>
+	 * <li>a cycle in would be created</li>
+	 * </ul>
+	 */
+	public TypeDeclarationExpression newTypeDeclarationExpression(AbstractTypeDeclaration declaration) {
+		TypeDeclarationExpression result = new TypeDeclarationExpression(this);
+		result.setDeclaration(declaration);
+		return result;
+	}
 
 	/**
 	 * Creates an unparented block node owned by this AST, for an empty list
@@ -2663,6 +2688,7 @@ public final class AST {
 	void setFlag(int newValue) {
 		this.bits |= newValue;
 	}
+
 
 	
 	

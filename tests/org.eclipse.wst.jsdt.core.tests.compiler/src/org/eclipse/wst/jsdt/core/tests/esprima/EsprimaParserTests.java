@@ -80,6 +80,7 @@ import org.eclipse.wst.jsdt.core.dom.ThisExpression;
 import org.eclipse.wst.jsdt.core.dom.ThrowStatement;
 import org.eclipse.wst.jsdt.core.dom.TryStatement;
 import org.eclipse.wst.jsdt.core.dom.TypeDeclaration;
+import org.eclipse.wst.jsdt.core.dom.TypeDeclarationExpression;
 import org.eclipse.wst.jsdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclarationFragment;
@@ -1327,9 +1328,33 @@ public class EsprimaParserTests {
 		FunctionDeclaration func = (FunctionDeclaration)export.getDeclaration();
 		assertEquals("agen", func.getMethodName().toString());
 		assertTrue(func.isGenerator());
-		
-		
 	}
+	@Test
+	public void testComments(){
+		JavaScriptUnit unit = parse("/**\n"
+					+ "*Life, Universe, and Everything\n"
+					+ "*/\n"
+					+ "var answer = 6 * 7;\n"
+					+ "//asdfasf\n"
+					+ "var f =function(){\n"
+					+ "//asdfasdfff\n"
+					+"tata}");
+		List commentList = unit.getCommentList();
+		assertNotNull(commentList);
+		assertEquals(3,commentList.size());
+	}
+	
+	@Test 
+	public void testClassExpression(){
+		JavaScriptUnit unit = parse("(class A extends 0{})");
+		assertFalse(unit.statements().isEmpty());
+		assertEquals(ASTNode.EXPRESSION_STATEMENT, unit.statements().get(0).getNodeType());
+		ExpressionStatement es= (ExpressionStatement)unit.statements().get(0);
+		TypeDeclarationExpression dex = (TypeDeclarationExpression) es.getExpression();
+		TypeDeclaration td = (TypeDeclaration)dex.getDeclaration();
+		assertEquals("A", td.getName().getIdentifier());
+	}
+	
 	// #### Everything.js tests.
 	
 	@Test
@@ -1348,7 +1373,7 @@ public class EsprimaParserTests {
 	}
 
 	private JavaScriptUnit parse(String content){
-		return EsprimaParser.newParser().setSource(content).parse();
+		return EsprimaParser.newParser().includeComments().setSource(content).parse();
 	}
 	
 	private void testEverythingJs(String file){

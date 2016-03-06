@@ -2291,4 +2291,17 @@ public class ASTMatcher {
 			&& safeSubtreeListMatch(exportDeclaration.specifiers(), o.specifiers());			
 	}
 
+	/**
+	 * @param typeDeclarationExpression
+	 * @param other
+	 * @return
+	 */
+	public boolean match(TypeDeclarationExpression typeDeclarationExpression, Object other) {
+		if(!(other instanceof TypeDeclarationExpression)){
+			return false;
+		}
+		TypeDeclarationExpression o = (TypeDeclarationExpression) other;
+		return safeSubtreeMatch(typeDeclarationExpression.getDeclaration(), o.getDeclaration());
+	}
+
 }

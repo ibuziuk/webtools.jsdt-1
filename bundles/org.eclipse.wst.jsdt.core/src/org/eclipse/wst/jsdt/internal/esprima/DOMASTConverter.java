@@ -78,6 +78,7 @@ import org.eclipse.wst.jsdt.core.dom.ThisExpression;
 import org.eclipse.wst.jsdt.core.dom.ThrowStatement;
 import org.eclipse.wst.jsdt.core.dom.TryStatement;
 import org.eclipse.wst.jsdt.core.dom.TypeDeclaration;
+import org.eclipse.wst.jsdt.core.dom.TypeDeclarationExpression;
 import org.eclipse.wst.jsdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclaration;
 import org.eclipse.wst.jsdt.core.dom.VariableDeclarationExpression;
@@ -184,6 +185,8 @@ public class DOMASTConverter extends EStreeVisitor{
 				return convertForOfStatement(object);
 			case ClassDeclaration:
 				return convertClassDeclaration(object);
+			case ClassExpression: 
+				return convertClassExpression(object);
 			case ClassBody: 
 				// ClassBody is represented with a single TypeDeclaration 
 				// pushing the TypeDeclaration created for ClassDeclaration
@@ -259,10 +262,12 @@ public class DOMASTConverter extends EStreeVisitor{
 				return convertExportDeclaration(object, false, true);
 			case ExportDefaultDeclaration:
 				return convertExportDeclaration(object, true, false);
+		
 			default:
 				throw new UnimplementedException(nodeType.getTypeString() + " conversion is not implemented"); //$NON-NLS-1$
 		}
 	}
+
 
 
 
@@ -465,6 +470,7 @@ public class DOMASTConverter extends EStreeVisitor{
 				typeDec.bodyDeclarations().add(statement);
 				break;
 			case TYPE_DECLARATION_STATEMENT:
+			case TYPE_DECLARATION_EXPRESSION:
 				//TypeDeclaration is already assigned during convert.
 				break;
 			case EXPORT_DECLARATION:
@@ -1145,6 +1151,19 @@ public class DOMASTConverter extends EStreeVisitor{
 		AbstractTypeDeclaration td = ast.newTypeDeclaration();
 		TypeDeclarationStatement tds = ast.newTypeDeclarationStatement(td);
 		nodes.push(tds);
+		nodes.push(td);
+		return VisitOptions.CONTINUE;
+	}
+	
+
+	/**
+	 * @param object
+	 * @return
+	 */
+	private VisitOptions convertClassExpression(ScriptObjectMirror object) {
+		AbstractTypeDeclaration td = ast.newTypeDeclaration();
+		TypeDeclarationExpression tde = ast.newTypeDeclarationExpression(td);
+		nodes.push(tde);
 		nodes.push(td);
 		return VisitOptions.CONTINUE;
 	}
