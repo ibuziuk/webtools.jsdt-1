@@ -34,6 +34,11 @@ public interface IJavaScriptPartitions {
 	 * The identifier multi-line (JLS2: TraditionalComment) comment partition content type.
 	 */
 	String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
+	
+	/**
+	 * The identifier template-literal partition content type.
+	 */
+	String JAVASCRIPT_TEMPLATE_LITERAL = "__javascript_template_literal"; //$NON-NLS-1$
 
 	/**
 	 * The identifier of the Javadoc (JLS2: DocumentationComment) partition content type.

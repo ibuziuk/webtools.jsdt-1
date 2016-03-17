@@ -117,6 +117,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 		assistant.setContentAssistProcessor(fProcessor, IJavaScriptPartitions.JAVA_CHARACTER);
 		assistant.setContentAssistProcessor(fProcessor, IJavaScriptPartitions.JAVA_SINGLE_LINE_COMMENT);
 		assistant.setContentAssistProcessor(fProcessor, IJavaScriptPartitions.JAVA_MULTI_LINE_COMMENT);
+		assistant.setContentAssistProcessor(fProcessor, IJavaScriptPartitions.JAVASCRIPT_TEMPLATE_LITERAL);
 		assistant.setContentAssistProcessor(fProcessor, IJavaScriptPartitions.JAVA_DOC);
 
 		assistant.enableAutoInsert(store.getBoolean(PreferenceConstants.CODEASSIST_AUTOINSERT));

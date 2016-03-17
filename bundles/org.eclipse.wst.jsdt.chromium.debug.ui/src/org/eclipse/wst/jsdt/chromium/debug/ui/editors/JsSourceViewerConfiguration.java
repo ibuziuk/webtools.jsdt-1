@@ -31,7 +31,8 @@ public class JsSourceViewerConfiguration extends TextSourceViewerConfiguration {
   private static final String[] CONTENT_TYPES = new String[] {
       IDocument.DEFAULT_CONTENT_TYPE,
       JsPartitionScanner.JSDOC,
-      JsPartitionScanner.MULTILINE_COMMENT
+      JsPartitionScanner.MULTILINE_COMMENT,
+      JsPartitionScanner.TEMPLATE_LITERAL
   };
 
   private final JsCodeScanner scanner = new JsCodeScanner();
@@ -52,6 +53,9 @@ public class JsSourceViewerConfiguration extends TextSourceViewerConfiguration {
     setDamagerRepairer(
         pr, new DefaultDamagerRepairer(new MultilineCommentScanner(scanner.getJsDocAttribute())),
         JsPartitionScanner.JSDOC);
+    setDamagerRepairer(
+    	pr, new DefaultDamagerRepairer(new MultilineCommentScanner(scanner.getCommentAttribute())),
+    	JsPartitionScanner.TEMPLATE_LITERAL);
     return pr;
   }
 

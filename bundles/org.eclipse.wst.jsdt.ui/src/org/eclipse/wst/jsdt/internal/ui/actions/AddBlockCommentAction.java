@@ -202,6 +202,7 @@ public class AddBlockCommentAction extends BlockCommentAction {
 	private boolean isSpecialPartition(String partType) {
 		return partType == IJavaScriptPartitions.JAVA_CHARACTER
 				|| partType == IJavaScriptPartitions.JAVA_STRING
+				|| partType == IJavaScriptPartitions.JAVASCRIPT_TEMPLATE_LITERAL
 				|| partType == IJavaScriptPartitions.JAVA_SINGLE_LINE_COMMENT;
 	}
 

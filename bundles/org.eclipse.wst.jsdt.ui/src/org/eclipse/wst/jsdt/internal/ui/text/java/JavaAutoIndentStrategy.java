@@ -606,6 +606,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 									  IJavaScriptPartitions.JAVA_MULTI_LINE_COMMENT,
 									  IJavaScriptPartitions.JAVA_SINGLE_LINE_COMMENT,
 									  IJavaScriptPartitions.JAVA_STRING,
+									  IJavaScriptPartitions.JAVASCRIPT_TEMPLATE_LITERAL,
 									  IJavaScriptPartitions.JAVA_CHARACTER,
 									  IDocument.DEFAULT_CONTENT_TYPE
 		};

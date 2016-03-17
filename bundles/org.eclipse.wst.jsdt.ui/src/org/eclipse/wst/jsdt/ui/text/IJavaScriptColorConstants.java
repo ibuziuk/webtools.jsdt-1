@@ -40,6 +40,11 @@ public interface IJavaScriptColorConstants {
 	 * (value <code>"java_multi_line_comment"</code>).
 	 */
 	String JAVA_MULTI_LINE_COMMENT= "java_multi_line_comment"; //$NON-NLS-1$
+	
+	/**
+	 * The color key for template literals in JavaScript code
+	 */
+	String JAVASCRIPT_TEMPLATE_LITERAL = "javascript_template_literal"; //$NON-NLS-1$
 
 	/** The color key for single-line comments in JavaScript code
 	 * (value <code>"java_single_line_comment"</code>).

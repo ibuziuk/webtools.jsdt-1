@@ -648,7 +648,14 @@ public class JavaScriptSourceViewerConfiguration extends TextSourceViewerConfigu
 	 */
 	@Override
 	public String[] getConfiguredContentTypes(final ISourceViewer sourceViewer) {
-		return new String[]{IDocument.DEFAULT_CONTENT_TYPE, IJavaScriptPartitions.JAVA_DOC, IJavaScriptPartitions.JAVA_MULTI_LINE_COMMENT, IJavaScriptPartitions.JAVA_SINGLE_LINE_COMMENT, IJavaScriptPartitions.JAVA_STRING, IJavaScriptPartitions.JAVA_CHARACTER};
+		return new String[] {
+					IDocument.DEFAULT_CONTENT_TYPE, 
+					IJavaScriptPartitions.JAVA_DOC, 
+					IJavaScriptPartitions.JAVA_MULTI_LINE_COMMENT, 
+					IJavaScriptPartitions.JAVA_SINGLE_LINE_COMMENT, 
+					IJavaScriptPartitions.JAVA_STRING, 
+					IJavaScriptPartitions.JAVASCRIPT_TEMPLATE_LITERAL,
+					IJavaScriptPartitions.JAVA_CHARACTER};
 	}
 
 	/*

@@ -32,6 +32,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaSc
 	private static final int STRING= 5;
 	private static final int REGULAR_EXPRESSION = 6;
 	private static final int SHEBANG_LINE= 7;
+	private static final int JS_TEMPLATE_LITERAL = 8;
 
 	// beginning of prefixes and postfixes
 	private static final int NONE= 0;
@@ -44,6 +45,8 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaSc
 	private static final int REGULAR_EXPRESSION_END=7;
 	private static final int BACKSLASH_CARRIAGE_RETURN = 8; // anti-postfix for STRING, CHARACTER
 	private static final int HASH= 9; // prefix for SHEBANG
+	private static final int BACKQUOTE = 10; // prefix for JS_TEMPLATE_LITERAL
+	
 
 	/** The scanner. */
 	private final BufferedDocumentScanner fScanner= new BufferedDocumentScanner(1000);	// faster implementation
@@ -68,7 +71,8 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaSc
 		new Token(JAVA_CHARACTER),
 		new Token(JAVA_STRING),
 		new Token(JAVA_STRING),	// regular expression same as string
-		new Token(JAVA_SHEBANG_LINE)
+		new Token(JAVA_SHEBANG_LINE),
+		new Token(JAVASCRIPT_TEMPLATE_LITERAL)
 	};
 
 	public FastJavaPartitionScanner() {
@@ -171,6 +175,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaSc
 					case REGULAR_EXPRESSION:
 					case CHARACTER:
 					case STRING:
+					case JS_TEMPLATE_LITERAL:
 
 						int last;
 						int newState;
@@ -194,7 +199,12 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaSc
 							last= NONE;
 							newState= STRING;
 							break;
-
+							
+						case '`':
+							last = NONE;
+							newState = JAVASCRIPT;
+							break;
+							
 						case '\r':
 							last= CARRIAGE_RETURN;
 							newState= JAVASCRIPT;
@@ -315,6 +325,17 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaSc
 						consume();
 						break;
 					}
+					
+				case '`':
+					fLast = NONE; // ignore fLast
+					if (fTokenLength > 0) {
+						return preFix(JAVASCRIPT, JS_TEMPLATE_LITERAL, NONE, 1);	
+					} else {
+						preFix(JAVASCRIPT, JS_TEMPLATE_LITERAL, NONE, 1);
+						fTokenOffset += fTokenLength;
+						fTokenLength = fPrefixLength;
+						break;
+					}
 
 				case '\'':
 					fLast= NONE; // ignore fLast
@@ -401,6 +422,21 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaSc
 					break;
 				}
 				break;
+				
+	 		case JS_TEMPLATE_LITERAL:
+	 			switch (currentChar) {
+	 			case '`':
+	 				if (fLast != BACKSLASH) {
+	 					return postFix(JS_TEMPLATE_LITERAL);
+	 				} else {
+	 					consume();
+	 					break;
+	 				}
+	 			default:
+	 				consume();
+	 				break;
+	 			}
+	 			break;
 
 	 		case STRING:
 	 			switch (currentChar) {
@@ -522,6 +558,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaSc
 		case SLASH:
 		case STAR:
 		case HASH:
+		case BACKQUOTE:
 			return 1;
 
 		case SLASH_STAR:
@@ -565,6 +602,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaSc
 
 		else if (contentType.equals(JAVA_MULTI_LINE_COMMENT))
 			return MULTI_LINE_COMMENT;
+		
+		else if (contentType.equals(JAVASCRIPT_TEMPLATE_LITERAL))
+			return JS_TEMPLATE_LITERAL;
 
 		else if (contentType.equals(JAVA_DOC))
 			return JSDOC;
