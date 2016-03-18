@@ -129,6 +129,13 @@ public class JavaScriptSourceViewerConfiguration extends TextSourceViewerConfigu
 	 *
 	 */
 	private AbstractJavaScanner fMultilineCommentScanner;
+	
+	/**
+	 * The JavaScript multi-line comment scanner.
+	 *
+	 */
+	private AbstractJavaScanner fTemplateLiteralScanner;
+	
 	/**
 	 * The JavaScript single-line comment scanner.
 	 *
@@ -293,6 +300,7 @@ public class JavaScriptSourceViewerConfiguration extends TextSourceViewerConfigu
 		fCodeScanner = new JavaCodeScanner(getColorManager(), fPreferenceStore);
 		fMultilineCommentScanner = new JavaCommentScanner(getColorManager(), fPreferenceStore, IJavaScriptColorConstants.JAVA_MULTI_LINE_COMMENT);
 		fSinglelineCommentScanner = new JavaCommentScanner(getColorManager(), fPreferenceStore, IJavaScriptColorConstants.JAVA_SINGLE_LINE_COMMENT);
+		fTemplateLiteralScanner = new JavaCommentScanner(getColorManager(), fPreferenceStore, IJavaScriptColorConstants.JAVASCRIPT_TEMPLATE_LITERAL);
 		fStringScanner = new SingleTokenJavaScanner(getColorManager(), fPreferenceStore, IJavaScriptColorConstants.JAVA_STRING);
 		fJavaDocScanner = new JavaDocScanner(getColorManager(), fPreferenceStore);
 	}
@@ -317,6 +325,10 @@ public class JavaScriptSourceViewerConfiguration extends TextSourceViewerConfigu
 		dr = new DefaultDamagerRepairer(getMultilineCommentScanner());
 		reconciler.setDamager(dr, IJavaScriptPartitions.JAVA_MULTI_LINE_COMMENT);
 		reconciler.setRepairer(dr, IJavaScriptPartitions.JAVA_MULTI_LINE_COMMENT);
+		
+		dr = new DefaultDamagerRepairer(fTemplateLiteralScanner);
+		reconciler.setDamager(dr, IJavaScriptPartitions.JAVASCRIPT_TEMPLATE_LITERAL);
+		reconciler.setRepairer(dr, IJavaScriptPartitions.JAVASCRIPT_TEMPLATE_LITERAL);
 
 		dr = new DefaultDamagerRepairer(getSinglelineCommentScanner());
 		reconciler.setDamager(dr, IJavaScriptPartitions.JAVA_SINGLE_LINE_COMMENT);
