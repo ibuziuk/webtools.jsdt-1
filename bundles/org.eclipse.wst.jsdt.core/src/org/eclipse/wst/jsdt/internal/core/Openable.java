@@ -32,17 +32,9 @@ import org.eclipse.wst.jsdt.core.IJavaScriptModelStatusConstants;
 import org.eclipse.wst.jsdt.core.IOpenable;
 import org.eclipse.wst.jsdt.core.JavaScriptModelException;
 import org.eclipse.wst.jsdt.core.WorkingCopyOwner;
-import org.eclipse.wst.jsdt.core.ast.ASTVisitor;
-import org.eclipse.wst.jsdt.core.compiler.CharOperation;
 import org.eclipse.wst.jsdt.core.dom.AST;
-import org.eclipse.wst.jsdt.core.dom.ASTNode;
-import org.eclipse.wst.jsdt.core.dom.ASTParser;
-import org.eclipse.wst.jsdt.core.dom.Expression;
-import org.eclipse.wst.jsdt.core.dom.FunctionDeclaration;
-import org.eclipse.wst.jsdt.core.dom.JavaScriptUnit;
-import org.eclipse.wst.jsdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.wst.jsdt.core.infer.IInferEngine;
 import org.eclipse.wst.jsdt.internal.codeassist.CompletionEngine;
+import org.eclipse.wst.jsdt.internal.codeassist.DOMCompletionEngine;
 import org.eclipse.wst.jsdt.internal.codeassist.SelectionEngine;
 import org.eclipse.wst.jsdt.internal.core.util.Util;
 
@@ -147,6 +139,8 @@ protected void codeComplete(org.eclipse.wst.jsdt.internal.compiler.env.ICompilat
 	org.eclipse.wst.jsdt.core.dom.JavaScriptUnit result = info.ast;
 	
 	
+	DOMCompletionEngine domEngine = new DOMCompletionEngine(requestor, project);
+	domEngine.complete(result, position,0);
 
 	
 	// set unit to skip
@@ -172,67 +166,31 @@ protected IJavaScriptElement[] codeSelect(org.eclipse.wst.jsdt.internal.compiler
 		performanceStats.startRun(new String(cu.getFileName()) + " at [" + offset + "," + length + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
-	
-	ASTParser parser = ASTParser.newParser(AST.JLS3);
-	parser.setSource(cu.getContents());
-	
-	JavaScriptUnit unit= (JavaScriptUnit) parser.createAST(null);
-	if(unit.statements().isEmpty())
-		return new IJavaScriptElement[0];	
-	
-	final DOMNodeFinder finder = new DOMNodeFinder(offset);
-	unit.accept(finder);
-	if(finder.found == null )
-		return new IJavaScriptElement[0];	
-	
-	switch (finder.found.getNodeType()) {
-		case ASTNode.VARIABLE_DECLARATION_FRAGMENT :{
-			VariableDeclarationFragment node = (VariableDeclarationFragment) finder.found;
-			String fieldName = JavaModelManager.getJavaModelManager().intern(new String(node.getName().getIdentifier()));
-			SourceField handle = new SourceField(this, fieldName);
-			return new IJavaScriptElement[] {handle};
-		}
-		case ASTNode.FUNCTION_DECLARATION:
-		{
-			FunctionDeclaration fd = (FunctionDeclaration) finder.found; 
-			final Expression methodName = fd.getMethodName();
-			char[] cs = methodName !=null ? fd.getMethodName().toString().toCharArray(): CharOperation.concat(IInferEngine.ANONYMOUS_PREFIX, IInferEngine.ANONYMOUS_CLASS_ID);
-			String selector = JavaModelManager.getJavaModelManager().intern(new String(cs));
-			//TODO: Handle parameterSignatures
-			String[] parameterTypeSigs = new String[0];
-			SourceMethod handle = new SourceMethod(this, selector, parameterTypeSigs);
-			return new IJavaScriptElement[] {handle}; 
-		}	
-		default :
-			return new IJavaScriptElement[0];	
+	JavaProject project = (JavaProject)getJavaScriptProject();
+	SearchableEnvironment environment = newSearchableNameEnvironment(owner);
+
+	SelectionRequestor requestor= new SelectionRequestor(environment.nameLookup, this);
+	IBuffer buffer = getBuffer();
+	if (buffer == null) {
+		return requestor.getElements();
 	}
-	
+	int end= buffer.getLength();
+	if (offset < 0 || length < 0 || offset + length > end ) {
+		throw new JavaScriptModelException(new JavaModelStatus(IJavaScriptModelStatusConstants.INDEX_OUT_OF_BOUNDS));
+	}
 
-	
-	
-//	JavaProject project = (JavaProject)getJavaScriptProject();
-//	SearchableEnvironment environment = newSearchableNameEnvironment(owner);
-//
-//	SelectionRequestor requestor= new SelectionRequestor(environment.nameLookup, this);
-//	IBuffer buffer = getBuffer();
-//	if (buffer == null) {
-//		return requestor.getElements();
-//	}
-//	int end= buffer.getLength();
-//	if (offset < 0 || length < 0 || offset + length > end ) {
-//		throw new JavaScriptModelException(new JavaModelStatus(IJavaScriptModelStatusConstants.INDEX_OUT_OF_BOUNDS));
-//	}
-//
-//	// fix for 1FVXGDK
-//	SelectionEngine engine = new SelectionEngine(environment, requestor, project.getOptions(true));
-//	engine.select(cu, offset, offset + length - 1);
+	// fix for 1FVXGDK
+	SelectionEngine engine = new SelectionEngine(environment, requestor, project.getOptions(true));
+	engine.select(cu, offset, offset + length - 1);
 
-
-//	if (NameLookup.VERBOSE) {
-//		System.out.println(Thread.currentThread() + " TIME SPENT in NameLoopkup#seekTypesInSourcePackage: " + environment.nameLookup.timeSpentInSeekTypesInSourcePackage + "ms");  //$NON-NLS-1$ //$NON-NLS-2$
-//		System.out.println(Thread.currentThread() + " TIME SPENT in NameLoopkup#seekTypesInBinaryPackage: " + environment.nameLookup.timeSpentInSeekTypesInBinaryPackage + "ms");  //$NON-NLS-1$ //$NON-NLS-2$
-//	}
-//	return requestor.getElements();
+	if(performanceStats != null) {
+		performanceStats.endRun();
+	}
+	if (NameLookup.VERBOSE) {
+		System.out.println(Thread.currentThread() + " TIME SPENT in NameLoopkup#seekTypesInSourcePackage: " + environment.nameLookup.timeSpentInSeekTypesInSourcePackage + "ms");  //$NON-NLS-1$ //$NON-NLS-2$
+		System.out.println(Thread.currentThread() + " TIME SPENT in NameLoopkup#seekTypesInBinaryPackage: " + environment.nameLookup.timeSpentInSeekTypesInBinaryPackage + "ms");  //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	return requestor.getElements();
 }
 /*
  * Returns a new element info for this element.
