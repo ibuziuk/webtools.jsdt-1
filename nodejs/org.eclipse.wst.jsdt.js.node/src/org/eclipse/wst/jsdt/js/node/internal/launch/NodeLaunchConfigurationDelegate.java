@@ -12,25 +12,24 @@ package org.eclipse.wst.jsdt.js.node.internal.launch;
 
 import java.io.File;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
-import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.wst.jsdt.core.runtime.IJSRuntimeInstall;
 import org.eclipse.wst.jsdt.core.runtime.IJSRunner;
+import org.eclipse.wst.jsdt.core.runtime.IJSRuntimeInstall;
 import org.eclipse.wst.jsdt.core.runtime.JSRunnerConfiguration;
 import org.eclipse.wst.jsdt.core.runtime.JSRuntimeManager;
+import org.eclipse.wst.jsdt.js.node.NodePlugin;
 import org.eclipse.wst.jsdt.js.node.internal.NodeConstants;
 import org.eclipse.wst.jsdt.js.node.internal.util.LaunchConfigurationUtil;
 import org.eclipse.wst.jsdt.js.node.runtime.NodeJsRuntimeType;
@@ -42,6 +41,28 @@ import org.eclipse.wst.jsdt.launching.ExecutionArguments;
  * @author "Adalberto Lopez Venegas (adalbert)"
  */
 public class NodeLaunchConfigurationDelegate extends LaunchConfigurationDelegate {
+	
+	 
+	class DebuggerConnectRunnable implements Runnable{
+		Exception exception = null;
+		NodeDebugConnector connector;
+		@Override
+		public void run() {
+				long start = System.currentTimeMillis();
+				boolean attached = false;
+				Exception e =null;
+				do {
+					try{
+						attached = connector.attach();
+					}catch(Exception ex ){
+						e= ex;
+					}
+				} while( !attached  && System.currentTimeMillis() < start + 15000);
+				if(!attached){
+					exception = e;
+				}
+		}
+	}
     /*
      * (non-Javadoc)
      *
@@ -53,7 +74,7 @@ public class NodeLaunchConfigurationDelegate extends LaunchConfigurationDelegate
      */
 
     @Override
-	public void launch(ILaunchConfiguration configuration, final String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
+	public void launch(ILaunchConfiguration configuration, final String mode, final ILaunch launch, IProgressMonitor monitor) throws CoreException {
         if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
@@ -111,45 +132,33 @@ public class NodeLaunchConfigurationDelegate extends LaunchConfigurationDelegate
 			monitor.worked(1);
 
 			// Launch the configuration - 1 unit of work
-			runner.run(runConfig, launch, monitor);
+			IProcess process = runner.run(runConfig, launch, monitor);
 			
-			// Launch Chromium V8 
-			if(mode.equals(ILaunchManager.DEBUG_MODE)){
-			    ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-			    ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(NodeConstants.CHROMIUM_LAUNCH_CONFIGURATION_TYPE_ID);
-				IContainer container = null;
-				final ILaunchConfigurationWorkingCopy chromiumLaunch = type.newInstance(container, configuration.getName());
+			if(process == null ) return;
+			DebuggerConnectRunnable runnable = new DebuggerConnectRunnable();
+			runnable.connector = new NodeDebugConnector(configuration, launch);
+			Thread thread = new Thread(runnable, "Connect to node.js debugger thread");
+			thread.setDaemon(true);
+			thread.start();
+			while(thread.isAlive()) {
 
-				chromiumLaunch.setAttribute(NodeConstants.CHROMIUM_DEBUG_HOST,
-						configuration.getAttribute(NodeConstants.ATTR_HOST_FIELD, NodeConstants.DEFAULT_HOST));
-
-				chromiumLaunch.setAttribute(NodeConstants.CHROMIUM_DEBUG_PORT, Integer.parseInt(configuration
-						.getAttribute(NodeConstants.ATTR_PORT_FIELD, String.valueOf(NodeConstants.DEFAULT_PORT))));
-
-				chromiumLaunch.setAttribute(NodeConstants.ADD_NETWORK_CONSOLE,
-						configuration.getAttribute(NodeConstants.ATTR_ADD_NETWORK_CONSOLE_FIELD, false));
-
-				chromiumLaunch.setAttribute(NodeConstants.BREAKPOINT_SYNC_DIRECTION, NodeConstants.MERGE);
-
-				chromiumLaunch.setAttribute(NodeConstants.SOURCE_LOOKUP_MODE, NodeConstants.EXACT_MATCH);
-				
-				chromiumLaunch.setAttribute(NodeConstants.ATTR_APP_PROJECT, project);
-				
-				
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						DebugUITools.launch(chromiumLaunch, mode);
-					}
-				});
-
+				if(monitor.isCanceled()) {
+					thread.interrupt();
+				}
+				try {
+					Thread.sleep(100);
+				}
+				catch (Exception e) {
+				}
 			}
-
-			// check for cancellation
-			if (monitor.isCanceled()) {
-				return;
+			if(runnable.exception != null) {
+				if(runnable.exception instanceof CoreException){
+					throw (CoreException)runnable.exception;
+				}
+				throw new CoreException(new Status(IStatus.ERROR,NodePlugin.PLUGIN_ID,
+						runnable.exception.getMessage(), runnable.exception));
 			}
-		}
+		} 
 		finally {
 			monitor.done();
 		}
