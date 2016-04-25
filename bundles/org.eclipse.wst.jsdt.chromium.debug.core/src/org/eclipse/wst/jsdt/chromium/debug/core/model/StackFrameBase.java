@@ -7,6 +7,7 @@
 package org.eclipse.wst.jsdt.chromium.debug.core.model;
 
 import org.eclipse.wst.jsdt.chromium.debug.core.util.ChromiumDebugPluginUtil;
+import org.eclipse.wst.jsdt.debug.core.model.IJavaScriptStackFrame;
 import org.eclipse.wst.jsdt.chromium.DebugContext;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IRegisterGroup;
@@ -16,7 +17,7 @@ import org.eclipse.debug.core.model.IStackFrame;
  * A common base class for all stack frames. Frames may be 'real' or 'fake', e.g. frame that
  * represents throwing an exception.
  */
-public abstract class StackFrameBase extends DebugElementImpl.WithEvaluate implements IStackFrame {
+public abstract class StackFrameBase extends DebugElementImpl.WithEvaluate implements IJavaScriptStackFrame {
   public StackFrameBase(EvaluateContext evaluateContext) {
     super(evaluateContext);
   }
@@ -119,6 +120,10 @@ public abstract class StackFrameBase extends DebugElementImpl.WithEvaluate imple
         return null;
       }
       return getEvaluateContext();
+    }
+    if(adapter == IJavaScriptStackFrame.class)
+    {
+    	return this;
     }
     return super.getAdapter(adapter);
   }

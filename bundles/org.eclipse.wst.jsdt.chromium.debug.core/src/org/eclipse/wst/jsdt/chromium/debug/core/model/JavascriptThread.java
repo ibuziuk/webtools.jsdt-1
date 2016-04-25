@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.wst.jsdt.chromium.debug.core.ChromiumDebugPlugin;
+import org.eclipse.wst.jsdt.debug.core.model.IJavaScriptValue;
 import org.eclipse.wst.jsdt.chromium.Breakpoint;
 import org.eclipse.wst.jsdt.chromium.CallFrame;
 import org.eclipse.wst.jsdt.chromium.DebugContext;
@@ -170,6 +171,36 @@ public class JavascriptThread extends DebugElementImpl.WithConnected
     boolean isRegularFrame() {
       return false;
     }
+
+	@Override
+	public IJavaScriptValue evaluate(String expression) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSourceName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSourcePath() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSource() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IVariable getThisObject() {
+		// TODO Auto-generated method stub
+		return null;
+	}
   }
 
   public boolean hasStackFrames() throws DebugException {

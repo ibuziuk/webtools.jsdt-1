@@ -28,6 +28,7 @@ import org.eclipse.wst.jsdt.chromium.SyncCallback;
 import org.eclipse.wst.jsdt.chromium.TextStreamPosition;
 import org.eclipse.wst.jsdt.chromium.util.GenericCallback;
 import org.eclipse.wst.jsdt.chromium.util.JavaScriptExpressionBuilder;
+import org.eclipse.wst.jsdt.debug.core.model.IJavaScriptValue;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugException;
@@ -318,4 +319,34 @@ public class StackFrame extends StackFrameBase implements IDropToFrame {
       this.token = token;
     }
   }
+
+@Override
+public IJavaScriptValue evaluate(String expression) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public String getSourceName() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public String getSourcePath() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public String getSource() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public IVariable getThisObject() {
+	// TODO Auto-generated method stub
+	return null;
+}
 }
